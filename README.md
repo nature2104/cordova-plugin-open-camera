@@ -23,7 +23,7 @@ description: Capture audio, video, and images.
 
 # cordova-plugin-open-camera
 
-This plugin provides access to the device's audio, image, and video capture capabilities using [open camera]().
+This plugin provides access to the device's audio, image, and video capture capabilities using [open camera](https://sourceforge.net/projects/opencamera/).
 We can use [cordova-plugin-media-capture](https://github.com/apache/cordova-plugin-media-capture) orign plugin for video and image in Ionic project.
 But in some android device, we can only get 3gp format for video. And we can't control video quality/resolution in this plugin for android.
 So I tried to implement a new plugin using open camera project on android for Ionic 
@@ -132,6 +132,6 @@ code.
     // start audio capture
     navigator.device.capture.captureAudio(captureSuccess, captureError, {limit:2});
 
-[see more] about cordova-plugin-media-capture plugin
+[see more](https://github.com/apache/cordova-plugin-media-capture) about cordova-plugin-media-capture plugin
 
 
