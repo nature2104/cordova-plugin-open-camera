@@ -78,12 +78,252 @@ xmlns:rim="http://www.blackberry.com/ns/widgets"
             <uses-permission android:name="android.permission.RECORD_AUDIO" />
             <uses-permission android:name="android.permission.RECORD_VIDEO"/>
             <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-            <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+            <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />            
+            <uses-permission android:name="android.permission.CAMERA" />
+            <uses-feature android:name="android.hardware.camera" />
+            <uses-feature android:name="android.hardware.microphone" />
         </config-file>
+		<config-file target="AndroidManifest.xml" parent="/manifest/application">
+			 <activity
+					android:name="com.cordova.mediacapture.OpenCamera.CaptureActivity"
+					android:label="@string/app_name"
+					android:theme="@style/CameraActivityTheme"
+					android:screenOrientation="landscape"
+					android:configChanges="orientation|screenSize|keyboardHidden"
+					android:clearTaskOnLaunch="true"
+					>
+			</activity>
+			<activity
+					android:name="com.cordova.mediacapture.OpenCamera.TakePhoto"
+					android:label="@string/take_photo"
+					android:theme="@style/CameraActivityTheme"
+					android:icon="@drawable/ic_launcher_take_photo"
+					android:screenOrientation="landscape"
+					android:configChanges="orientation|screenSize|keyboardHidden"
+					android:taskAffinity=""
+					android:excludeFromRecents="true"
+					>
+			</activity>
+		</config-file>
 
         <source-file src="src/android/Capture.java" target-dir="src/org/apache/cordova/mediacapture" />
         <source-file src="src/android/FileHelper.java" target-dir="src/org/apache/cordova/mediacapture" />
         <source-file src="src/android/PendingRequests.java" target-dir="src/org/apache/cordova/mediacapture" />
+
+        <!-- For new Camera Capture Plugin  -->
+        <source-file src="src/android/OpenCamera/AudioListener.java" target-dir="src/com/cordova/mediacapture/OpenCamera" />
+        <source-file src="src/android/OpenCamera/CaptureActivity.java" target-dir="src/com/cordova/mediacapture/OpenCamera" />
+        <source-file src="src/android/OpenCamera/GyroSensor.java" target-dir="src/com/cordova/mediacapture/OpenCamera" />
+        <source-file src="src/android/OpenCamera/ImageSaver.java" target-dir="src/com/cordova/mediacapture/OpenCamera" />
+        <source-file src="src/android/OpenCamera/LocationSupplier.java" target-dir="src/com/cordova/mediacapture/OpenCamera" />
+        <source-file src="src/android/OpenCamera/MyApplicationInterface.java" target-dir="src/com/cordova/mediacapture/OpenCamera" />
+        <source-file src="src/android/OpenCamera/MyDebug.java" target-dir="src/com/cordova/mediacapture/OpenCamera" />
+        <source-file src="src/android/OpenCamera/MyPreferenceFragment.java" target-dir="src/com/cordova/mediacapture/OpenCamera" />
+        <source-file src="src/android/OpenCamera/PreferenceKeys.java" target-dir="src/com/cordova/mediacapture/OpenCamera" />
+        <source-file src="src/android/OpenCamera/SaveLocationHistory.java" target-dir="src/com/cordova/mediacapture/OpenCamera" />
+        <source-file src="src/android/OpenCamera/StorageUtils.java" target-dir="src/com/cordova/mediacapture/OpenCamera" />
+        <source-file src="src/android/OpenCamera/TakePhoto.java" target-dir="src/com/cordova/mediacapture/OpenCamera" />
+        <source-file src="src/android/OpenCamera/TextFormatter.java" target-dir="src/com/cordova/mediacapture/OpenCamera" />
+        <source-file src="src/android/OpenCamera/ToastBoxer.java" target-dir="src/com/cordova/mediacapture/OpenCamera" />
+        <source-file src="src/android/OpenCamera/CameraController/CameraController.java" target-dir="src/com/cordova/mediacapture/OpenCamera/CameraController" />
+        <source-file src="src/android/OpenCamera/CameraController/CameraController1.java" target-dir="src/com/cordova/mediacapture/OpenCamera/CameraController" />
+        <source-file src="src/android/OpenCamera/CameraController/CameraController2.java" target-dir="src/com/cordova/mediacapture/OpenCamera/CameraController" />
+        <source-file src="src/android/OpenCamera/CameraController/CameraControllerException.java" target-dir="src/com/cordova/mediacapture/OpenCamera/CameraController" />
+        <source-file src="src/android/OpenCamera/CameraController/CameraControllerManager.java" target-dir="src/com/cordova/mediacapture/OpenCamera/CameraController" />
+        <source-file src="src/android/OpenCamera/CameraController/CameraControllerManager1.java" target-dir="src/com/cordova/mediacapture/OpenCamera/CameraController" />
+        <source-file src="src/android/OpenCamera/CameraController/CameraControllerManager2.java" target-dir="src/com/cordova/mediacapture/OpenCamera/CameraController" />
+        <source-file src="src/android/OpenCamera/Preview/CameraSurface/CameraSurface.java" target-dir="src/com/cordova/mediacapture/OpenCamera/Preview/CameraSurface" />
+        <source-file src="src/android/OpenCamera/Preview/CameraSurface/MySurfaceView.java" target-dir="src/com/cordova/mediacapture/OpenCamera/Preview/CameraSurface" />
+        <source-file src="src/android/OpenCamera/Preview/CameraSurface/MyTextureView.java" target-dir="src/com/cordova/mediacapture/OpenCamera/Preview/CameraSurface" />
+        <source-file src="src/android/OpenCamera/Preview/ApplicationInterface.java" target-dir="src/com/cordova/mediacapture/OpenCamera/Preview" />
+        <source-file src="src/android/OpenCamera/Preview/CanvasView.java" target-dir="src/com/cordova/mediacapture/OpenCamera/Preview" />
+        <source-file src="src/android/OpenCamera/Preview/Preview.java" target-dir="src/com/cordova/mediacapture/OpenCamera/Preview" />
+        <source-file src="src/android/OpenCamera/Preview/VideoQualityHandler.java" target-dir="src/com/cordova/mediacapture/OpenCamera/Preview" />
+        <source-file src="src/android/OpenCamera/UI/DrawPreview.java" target-dir="src/com/cordova/mediacapture/OpenCamera/UI" />
+        <source-file src="src/android/OpenCamera/UI/FolderChooserDialog.java" target-dir="src/com/cordova/mediacapture/OpenCamera/UI" />
+        <source-file src="src/android/OpenCamera/UI/MainUI.java" target-dir="src/com/cordova/mediacapture/OpenCamera/UI" />
+        <source-file src="src/android/OpenCamera/UI/PopupView.java" target-dir="src/com/cordova/mediacapture/OpenCamera/UI" />
+
+        <resource-file src="src/android/drawable/take_photo_selector.xml" target="res/drawable/take_photo_selector.xml" /> />
+        <resource-file src="src/android/drawable/take_video_selector.xml" target="res/drawable/take_video_selector.xml" /> />
+        <resource-file src="src/android/drawable-hdpi/flash_auto.png" target="res/drawable-hdpi/flash_auto.png" /> />
+        <resource-file src="src/android/drawable-hdpi/flash_off.png" target="res/drawable-hdpi/flash_off.png" /> />
+        <resource-file src="src/android/drawable-hdpi/flash_on.png" target="res/drawable-hdpi/flash_on.png" /> />
+        <resource-file src="src/android/drawable-hdpi/ic_burst_mode_white_48dp.png" target="res/drawable-hdpi/ic_burst_mode_white_48dp.png" /> />
+        <resource-file src="src/android/drawable-hdpi/ic_exposure_white_48dp.png" target="res/drawable-hdpi/ic_exposure_white_48dp.png" /> />
+        <resource-file src="src/android/drawable-hdpi/ic_face_white_48dp.png" target="res/drawable-hdpi/ic_face_white_48dp.png" /> />
+        <resource-file src="src/android/drawable-hdpi/ic_hdr_on_white_48dp.png" target="res/drawable-hdpi/ic_hdr_on_white_48dp.png" /> />
+        <resource-file src="src/android/drawable-hdpi/ic_help_outline_white_48dp.png" target="res/drawable-hdpi/ic_help_outline_white_48dp.png" /> />
+        <resource-file src="src/android/drawable-hdpi/ic_info_outline_white_48dp.png" target="res/drawable-hdpi/ic_info_outline_white_48dp.png" /> />
+        <resource-file src="src/android/drawable-hdpi/ic_launcher_take_photo.png" target="res/drawable-hdpi/ic_launcher_take_photo.png" /> />
+        <resource-file src="src/android/drawable-hdpi/ic_mic_red_48dp.png" target="res/drawable-hdpi/ic_mic_red_48dp.png" /> />
+        <resource-file src="src/android/drawable-hdpi/ic_mic_white_48dp.png" target="res/drawable-hdpi/ic_mic_white_48dp.png" /> />
+        <resource-file src="src/android/drawable-hdpi/ic_more_horiz_white_48dp.png" target="res/drawable-hdpi/ic_more_horiz_white_48dp.png" /> />
+        <resource-file src="src/android/drawable-hdpi/ic_pause_circle_outline_white_48dp.png" target="res/drawable-hdpi/ic_pause_circle_outline_white_48dp.png" /> />
+        <resource-file src="src/android/drawable-hdpi/ic_photo_camera_white_48dp.png" target="res/drawable-hdpi/ic_photo_camera_white_48dp.png" /> />
+        <resource-file src="src/android/drawable-hdpi/ic_photo_size_select_large_white_48dp.png" target="res/drawable-hdpi/ic_photo_size_select_large_white_48dp.png" /> />
+        <resource-file src="src/android/drawable-hdpi/ic_play_circle_outline_white.png" target="res/drawable-hdpi/ic_play_circle_outline_white.png" /> />
+        <resource-file src="src/android/drawable-hdpi/ic_power_settings_new_white_48dp.png" target="res/drawable-hdpi/ic_power_settings_new_white_48dp.png" /> />
+        <resource-file src="src/android/drawable-hdpi/ic_save_white_48dp.png" target="res/drawable-hdpi/ic_save_white_48dp.png" /> />
+        <resource-file src="src/android/drawable-hdpi/ic_text_format_white_48dp.png" target="res/drawable-hdpi/ic_text_format_white_48dp.png" /> />
+        <resource-file src="src/android/drawable-hdpi/ic_timer_white_48dp.png" target="res/drawable-hdpi/ic_timer_white_48dp.png" /> />
+        <resource-file src="src/android/drawable-hdpi/ic_touch_app_white_48dp.png" target="res/drawable-hdpi/ic_touch_app_white_48dp.png" /> />
+        <resource-file src="src/android/drawable-hdpi/ic_videocam_white_48dp.png" target="res/drawable-hdpi/ic_videocam_white_48dp.png" /> />
+        <resource-file src="src/android/drawable-hdpi/settings.png" target="res/drawable-hdpi/settings.png" /> />
+        <resource-file src="src/android/drawable-hdpi/share.png" target="res/drawable-hdpi/share.png" /> />
+        <resource-file src="src/android/drawable-hdpi/switch_camera.png" target="res/drawable-hdpi/switch_camera.png" /> />
+        <resource-file src="src/android/drawable-hdpi/trash.png" target="res/drawable-hdpi/trash.png" /> />
+        <resource-file src="src/android/drawable-mdpi/earth.png" target="res/drawable-mdpi/earth.png" /> />
+        <resource-file src="src/android/drawable-mdpi/earth_off.png" target="res/drawable-mdpi/earth_off.png" /> />
+        <resource-file src="src/android/drawable-mdpi/exposure_locked.png" target="res/drawable-mdpi/exposure_locked.png" /> />
+        <resource-file src="src/android/drawable-mdpi/exposure_unlocked.png" target="res/drawable-mdpi/exposure_unlocked.png" /> />
+        <resource-file src="src/android/drawable-mdpi/flash_auto.png" target="res/drawable-mdpi/flash_auto.png" /> />
+        <resource-file src="src/android/drawable-mdpi/flash_off.png" target="res/drawable-mdpi/flash_off.png" /> />
+        <resource-file src="src/android/drawable-mdpi/flash_on.png" target="res/drawable-mdpi/flash_on.png" /> />
+        <resource-file src="src/android/drawable-mdpi/flash_red_eye.png" target="res/drawable-mdpi/flash_red_eye.png" /> />
+        <resource-file src="src/android/drawable-mdpi/flash_torch.png" target="res/drawable-mdpi/flash_torch.png" /> />
+        <resource-file src="src/android/drawable-mdpi/focus_mode_auto.png" target="res/drawable-mdpi/focus_mode_auto.png" /> />
+        <resource-file src="src/android/drawable-mdpi/focus_mode_continuous_picture.png" target="res/drawable-mdpi/focus_mode_continuous_picture.png" /> />
+        <resource-file src="src/android/drawable-mdpi/focus_mode_continuous_video.png" target="res/drawable-mdpi/focus_mode_continuous_video.png" /> />
+        <resource-file src="src/android/drawable-mdpi/focus_mode_edof.png" target="res/drawable-mdpi/focus_mode_edof.png" /> />
+        <resource-file src="src/android/drawable-mdpi/focus_mode_fixed.png" target="res/drawable-mdpi/focus_mode_fixed.png" /> />
+        <resource-file src="src/android/drawable-mdpi/focus_mode_infinity.png" target="res/drawable-mdpi/focus_mode_infinity.png" /> />
+        <resource-file src="src/android/drawable-mdpi/focus_mode_locked.png" target="res/drawable-mdpi/focus_mode_locked.png" /> />
+        <resource-file src="src/android/drawable-mdpi/focus_mode_macro.png" target="res/drawable-mdpi/focus_mode_macro.png" /> />
+        <resource-file src="src/android/drawable-mdpi/focus_mode_manual.png" target="res/drawable-mdpi/focus_mode_manual.png" /> />
+        <resource-file src="src/android/drawable-mdpi/gallery.png" target="res/drawable-mdpi/gallery.png" /> />
+        <resource-file src="src/android/drawable-mdpi/ic_burst_mode_white_48dp.png" target="res/drawable-mdpi/ic_burst_mode_white_48dp.png" /> />
+        <resource-file src="src/android/drawable-mdpi/ic_exposure_white_48dp.png" target="res/drawable-mdpi/ic_exposure_white_48dp.png" /> />
+        <resource-file src="src/android/drawable-mdpi/ic_face_white_48dp.png" target="res/drawable-mdpi/ic_face_white_48dp.png" /> />
+        <resource-file src="src/android/drawable-mdpi/ic_hdr_on_white_48dp.png" target="res/drawable-mdpi/ic_hdr_on_white_48dp.png" /> />
+        <resource-file src="src/android/drawable-mdpi/ic_help_outline_white_48dp.png" target="res/drawable-mdpi/ic_help_outline_white_48dp.png" /> />
+        <resource-file src="src/android/drawable-mdpi/ic_info_outline_white_48dp.png" target="res/drawable-mdpi/ic_info_outline_white_48dp.png" /> />
+        <resource-file src="src/android/drawable-mdpi/ic_launcher_take_photo.png" target="res/drawable-mdpi/ic_launcher_take_photo.png" /> />
+        <resource-file src="src/android/drawable-mdpi/ic_mic_red_48dp.png" target="res/drawable-mdpi/ic_mic_red_48dp.png" /> />
+        <resource-file src="src/android/drawable-mdpi/ic_mic_white_48dp.png" target="res/drawable-mdpi/ic_mic_white_48dp.png" /> />
+        <resource-file src="src/android/drawable-mdpi/ic_more_horiz_white_48dp.png" target="res/drawable-mdpi/ic_more_horiz_white_48dp.png" /> />
+        <resource-file src="src/android/drawable-mdpi/ic_pause_circle_outline_white_48dp.png" target="res/drawable-mdpi/ic_pause_circle_outline_white_48dp.png" /> />
+        <resource-file src="src/android/drawable-mdpi/ic_photo_camera_white_48dp.png" target="res/drawable-mdpi/ic_photo_camera_white_48dp.png" /> />
+        <resource-file src="src/android/drawable-mdpi/ic_photo_size_select_large_white_48dp.png" target="res/drawable-mdpi/ic_photo_size_select_large_white_48dp.png" /> />
+        <resource-file src="src/android/drawable-mdpi/ic_play_circle_outline_white.png" target="res/drawable-mdpi/ic_play_circle_outline_white.png" /> />
+        <resource-file src="src/android/drawable-mdpi/ic_power_settings_new_white_48dp.png" target="res/drawable-mdpi/ic_power_settings_new_white_48dp.png" /> />
+        <resource-file src="src/android/drawable-mdpi/ic_save_white_48dp.png" target="res/drawable-mdpi/ic_save_white_48dp.png" /> />
+        <resource-file src="src/android/drawable-mdpi/ic_text_format_white_48dp.png" target="res/drawable-mdpi/ic_text_format_white_48dp.png" /> />
+        <resource-file src="src/android/drawable-mdpi/ic_timer_white_48dp.png" target="res/drawable-mdpi/ic_timer_white_48dp.png" /> />
+        <resource-file src="src/android/drawable-mdpi/ic_touch_app_white_48dp.png" target="res/drawable-mdpi/ic_touch_app_white_48dp.png" /> />
+        <resource-file src="src/android/drawable-mdpi/ic_videocam_white_48dp.png" target="res/drawable-mdpi/ic_videocam_white_48dp.png" /> />
+        <resource-file src="src/android/drawable-mdpi/popup.png" target="res/drawable-mdpi/popup.png" /> />
+        <resource-file src="src/android/drawable-mdpi/popup_flash_auto.png" target="res/drawable-mdpi/popup_flash_auto.png" /> />
+        <resource-file src="src/android/drawable-mdpi/popup_flash_off.png" target="res/drawable-mdpi/popup_flash_off.png" /> />
+        <resource-file src="src/android/drawable-mdpi/popup_flash_on.png" target="res/drawable-mdpi/popup_flash_on.png" /> />
+        <resource-file src="src/android/drawable-mdpi/popup_flash_red_eye.png" target="res/drawable-mdpi/popup_flash_red_eye.png" /> />
+        <resource-file src="src/android/drawable-mdpi/popup_flash_torch.png" target="res/drawable-mdpi/popup_flash_torch.png" /> />
+        <resource-file src="src/android/drawable-mdpi/settings.png" target="res/drawable-mdpi/settings.png" /> />
+        <resource-file src="src/android/drawable-mdpi/share.png" target="res/drawable-mdpi/share.png" /> />
+        <resource-file src="src/android/drawable-mdpi/switch_camera.png" target="res/drawable-mdpi/switch_camera.png" /> />
+        <resource-file src="src/android/drawable-mdpi/switch_video.png" target="res/drawable-mdpi/switch_video.png" /> />
+        <resource-file src="src/android/drawable-mdpi/take_photo.png" target="res/drawable-mdpi/take_photo.png" /> />
+        <resource-file src="src/android/drawable-mdpi/take_photo_pref.png" target="res/drawable-mdpi/take_photo_pref.png" /> />
+        <resource-file src="src/android/drawable-mdpi/take_photo_pressed.png" target="res/drawable-mdpi/take_photo_pressed.png" /> />
+        <resource-file src="src/android/drawable-mdpi/take_video.png" target="res/drawable-mdpi/take_video.png" /> />
+        <resource-file src="src/android/drawable-mdpi/take_video_pref.png" target="res/drawable-mdpi/take_video_pref.png" /> />
+        <resource-file src="src/android/drawable-mdpi/take_video_pressed.png" target="res/drawable-mdpi/take_video_pressed.png" /> />
+        <resource-file src="src/android/drawable-mdpi/take_video_recording.png" target="res/drawable-mdpi/take_video_recording.png" /> />
+        <resource-file src="src/android/drawable-mdpi/trash.png" target="res/drawable-mdpi/trash.png" /> />
+        <resource-file src="src/android/drawable-xhdpi/flash_auto.png" target="res/drawable-xhdpi/flash_auto.png" /> />
+        <resource-file src="src/android/drawable-xhdpi/flash_off.png" target="res/drawable-xhdpi/flash_off.png" /> />
+        <resource-file src="src/android/drawable-xhdpi/flash_on.png" target="res/drawable-xhdpi/flash_on.png" /> />
+        <resource-file src="src/android/drawable-xhdpi/ic_burst_mode_white_48dp.png" target="res/drawable-xhdpi/ic_burst_mode_white_48dp.png" /> />
+        <resource-file src="src/android/drawable-xhdpi/ic_exposure_white_48dp.png" target="res/drawable-xhdpi/ic_exposure_white_48dp.png" /> />
+        <resource-file src="src/android/drawable-xhdpi/ic_face_white_48dp.png" target="res/drawable-xhdpi/ic_face_white_48dp.png" /> />
+        <resource-file src="src/android/drawable-xhdpi/ic_hdr_on_white_48dp.png" target="res/drawable-xhdpi/ic_hdr_on_white_48dp.png" /> />
+        <resource-file src="src/android/drawable-xhdpi/ic_help_outline_white_48dp.png" target="res/drawable-xhdpi/ic_help_outline_white_48dp.png" /> />
+        <resource-file src="src/android/drawable-xhdpi/ic_info_outline_white_48dp.png" target="res/drawable-xhdpi/ic_info_outline_white_48dp.png" /> />
+        <resource-file src="src/android/drawable-xhdpi/ic_launcher_take_photo.png" target="res/drawable-xhdpi/ic_launcher_take_photo.png" /> />
+        <resource-file src="src/android/drawable-xhdpi/ic_mic_red_48dp.png" target="res/drawable-xhdpi/ic_mic_red_48dp.png" /> />
+        <resource-file src="src/android/drawable-xhdpi/ic_mic_white_48dp.png" target="res/drawable-xhdpi/ic_mic_white_48dp.png" /> />
+        <resource-file src="src/android/drawable-xhdpi/ic_more_horiz_white_48dp.png" target="res/drawable-xhdpi/ic_more_horiz_white_48dp.png" /> />
+        <resource-file src="src/android/drawable-xhdpi/ic_pause_circle_outline_white_48dp.png" target="res/drawable-xhdpi/ic_pause_circle_outline_white_48dp.png" /> />
+        <resource-file src="src/android/drawable-xhdpi/ic_photo_camera_white_48dp.png" target="res/drawable-xhdpi/ic_photo_camera_white_48dp.png" /> />
+        <resource-file src="src/android/drawable-xhdpi/ic_photo_size_select_large_white_48dp.png" target="res/drawable-xhdpi/ic_photo_size_select_large_white_48dp.png" /> />
+        <resource-file src="src/android/drawable-xhdpi/ic_play_circle_outline_white.png" target="res/drawable-xhdpi/ic_play_circle_outline_white.png" /> />
+        <resource-file src="src/android/drawable-xhdpi/ic_power_settings_new_white_48dp.png" target="res/drawable-xhdpi/ic_power_settings_new_white_48dp.png" /> />
+        <resource-file src="src/android/drawable-xhdpi/ic_save_white_48dp.png" target="res/drawable-xhdpi/ic_save_white_48dp.png" /> />
+        <resource-file src="src/android/drawable-xhdpi/ic_text_format_white_48dp.png" target="res/drawable-xhdpi/ic_text_format_white_48dp.png" /> />
+        <resource-file src="src/android/drawable-xhdpi/ic_timer_white_48dp.png" target="res/drawable-xhdpi/ic_timer_white_48dp.png" /> />
+        <resource-file src="src/android/drawable-xhdpi/ic_touch_app_white_48dp.png" target="res/drawable-xhdpi/ic_touch_app_white_48dp.png" /> />
+        <resource-file src="src/android/drawable-xhdpi/ic_videocam_white_48dp.png" target="res/drawable-xhdpi/ic_videocam_white_48dp.png" /> />
+        <resource-file src="src/android/drawable-xhdpi/settings.png" target="res/drawable-xhdpi/settings.png" /> />
+        <resource-file src="src/android/drawable-xhdpi/share.png" target="res/drawable-xhdpi/share.png" /> />
+        <resource-file src="src/android/drawable-xhdpi/switch_camera.png" target="res/drawable-xhdpi/switch_camera.png" /> />
+        <resource-file src="src/android/drawable-xhdpi/take_photo.png" target="res/drawable-xhdpi/take_photo.png" /> />
+        <resource-file src="src/android/drawable-xhdpi/take_photo_pref.png" target="res/drawable-xhdpi/take_photo_pref.png" /> />
+        <resource-file src="src/android/drawable-xhdpi/take_photo_pressed.png" target="res/drawable-xhdpi/take_photo_pressed.png" /> />
+        <resource-file src="src/android/drawable-xhdpi/take_video_pref.png" target="res/drawable-xhdpi/take_video_pref.png" /> />
+        <resource-file src="src/android/drawable-xhdpi/take_video.png" target="res/drawable-xhdpi/take_video.png" /> />
+        <resource-file src="src/android/drawable-xhdpi/take_video_pressed.png" target="res/drawable-xhdpi/take_video_pressed.png" /> />
+        <resource-file src="src/android/drawable-xhdpi/take_video_recording.png" target="res/drawable-xhdpi/take_video_recording.png" /> />
+        <resource-file src="src/android/drawable-xhdpi/trash.png" target="res/drawable-xhdpi/trash.png" /> />
+        <resource-file src="src/android/drawable-xxhdpi/auto_stabilise_icon.png" target="res/drawable-xxhdpi/auto_stabilise_icon.png" /> />
+        <resource-file src="src/android/drawable-xxhdpi/earth.png" target="res/drawable-xxhdpi/earth.png" /> />
+        <resource-file src="src/android/drawable-xxhdpi/earth_off.png" target="res/drawable-xxhdpi/earth_off.png" /> />
+        <resource-file src="src/android/drawable-xxhdpi/flash_auto.png" target="res/drawable-xxhdpi/flash_auto.png" /> />
+        <resource-file src="src/android/drawable-xxhdpi/flash_off.png" target="res/drawable-xxhdpi/flash_off.png" /> />
+        <resource-file src="src/android/drawable-xxhdpi/flash_on.png" target="res/drawable-xxhdpi/flash_on.png" /> />
+        <resource-file src="src/android/drawable-xxhdpi/ic_burst_mode_white_48dp.png" target="res/drawable-xxhdpi/ic_burst_mode_white_48dp.png" /> />
+        <resource-file src="src/android/drawable-xxhdpi/ic_exposure_white_48dp.png" target="res/drawable-xxhdpi/ic_exposure_white_48dp.png" /> />
+        <resource-file src="src/android/drawable-xxhdpi/ic_face_white_48dp.png" target="res/drawable-xxhdpi/ic_face_white_48dp.png" /> />
+        <resource-file src="src/android/drawable-xxhdpi/ic_hdr_on_white_48dp.png" target="res/drawable-xxhdpi/ic_hdr_on_white_48dp.png" /> />
+        <resource-file src="src/android/drawable-xxhdpi/ic_help_outline_white_48dp.png" target="res/drawable-xxhdpi/ic_help_outline_white_48dp.png" /> />
+        <resource-file src="src/android/drawable-xxhdpi/ic_info_outline_white_48dp.png" target="res/drawable-xxhdpi/ic_info_outline_white_48dp.png" /> />
+        <resource-file src="src/android/drawable-xxhdpi/ic_launcher_take_photo.png" target="res/drawable-xxhdpi/ic_launcher_take_photo.png" /> />
+        <resource-file src="src/android/drawable-xxhdpi/ic_mic_red_48dp.png" target="res/drawable-xxhdpi/ic_mic_red_48dp.png" /> />
+        <resource-file src="src/android/drawable-xxhdpi/ic_mic_white_48dp.png" target="res/drawable-xxhdpi/ic_mic_white_48dp.png" /> />
+        <resource-file src="src/android/drawable-xxhdpi/ic_more_horiz_white_48dp.png" target="res/drawable-xxhdpi/ic_more_horiz_white_48dp.png" /> />
+        <resource-file src="src/android/drawable-xxhdpi/ic_pause_circle_outline_white_48dp.png" target="res/drawable-xxhdpi/ic_pause_circle_outline_white_48dp.png" /> />
+        <resource-file src="src/android/drawable-xxhdpi/ic_photo_camera_white_48dp.png" target="res/drawable-xxhdpi/ic_photo_camera_white_48dp.png" /> />
+        <resource-file src="src/android/drawable-xxhdpi/ic_photo_size_select_large_white_48dp.png" target="res/drawable-xxhdpi/ic_photo_size_select_large_white_48dp.png" /> />
+        <resource-file src="src/android/drawable-xxhdpi/ic_play_circle_outline_white.png" target="res/drawable-xxhdpi/ic_play_circle_outline_white.png" /> />
+        <resource-file src="src/android/drawable-xxhdpi/ic_power_settings_new_white_48dp.png" target="res/drawable-xxhdpi/ic_power_settings_new_white_48dp.png" /> />
+        <resource-file src="src/android/drawable-xxhdpi/ic_save_white_48dp.png" target="res/drawable-xxhdpi/ic_save_white_48dp.png" /> />
+        <resource-file src="src/android/drawable-xxhdpi/ic_text_format_white_48dp.png" target="res/drawable-xxhdpi/ic_text_format_white_48dp.png" /> />
+        <resource-file src="src/android/drawable-xxhdpi/ic_timer_white_48dp.png" target="res/drawable-xxhdpi/ic_timer_white_48dp.png" /> />
+        <resource-file src="src/android/drawable-xxhdpi/ic_touch_app_white_48dp.png" target="res/drawable-xxhdpi/ic_touch_app_white_48dp.png" /> />
+        <resource-file src="src/android/drawable-xxhdpi/ic_videocam_white_48dp.png" target="res/drawable-xxhdpi/ic_videocam_white_48dp.png" /> />
+        <resource-file src="src/android/drawable-xxhdpi/raw_icon.png" target="res/drawable-xxhdpi/raw_icon.png" /> />
+        <resource-file src="src/android/drawable-xxhdpi/settings.png" target="res/drawable-xxhdpi/settings.png" /> />
+        <resource-file src="src/android/drawable-xxhdpi/share.png" target="res/drawable-xxhdpi/share.png" /> />
+        <resource-file src="src/android/drawable-xxhdpi/switch_camera.png" target="res/drawable-xxhdpi/switch_camera.png" /> />
+        <resource-file src="src/android/drawable-xxhdpi/trash.png" target="res/drawable-xxhdpi/trash.png" /> />
+        <resource-file src="src/android/drawable-xxxhdpi/ic_burst_mode_white_48dp.png" target="res/drawable-xxxhdpi/ic_burst_mode_white_48dp.png" /> />
+        <resource-file src="src/android/drawable-xxxhdpi/ic_exposure_white_48dp.png" target="res/drawable-xxxhdpi/ic_exposure_white_48dp.png" /> />
+        <resource-file src="src/android/drawable-xxxhdpi/ic_face_white_48dp.png" target="res/drawable-xxxhdpi/ic_face_white_48dp.png" /> />
+        <resource-file src="src/android/drawable-xxxhdpi/ic_hdr_on_white_48dp.png" target="res/drawable-xxxhdpi/ic_hdr_on_white_48dp.png" /> />
+        <resource-file src="src/android/drawable-xxxhdpi/ic_help_outline_white_48dp.png" target="res/drawable-xxxhdpi/ic_help_outline_white_48dp.png" /> />
+        <resource-file src="src/android/drawable-xxxhdpi/ic_info_outline_white_48dp.png" target="res/drawable-xxxhdpi/ic_info_outline_white_48dp.png" /> />
+        <resource-file src="src/android/drawable-xxxhdpi/ic_more_horiz_white_48dp.png" target="res/drawable-xxxhdpi/ic_more_horiz_white_48dp.png" /> />
+        <resource-file src="src/android/drawable-xxxhdpi/ic_pause_circle_outline_white_48dp.png" target="res/drawable-xxxhdpi/ic_pause_circle_outline_white_48dp.png" /> />
+        <resource-file src="src/android/drawable-xxxhdpi/ic_photo_camera_white_48dp.png" target="res/drawable-xxxhdpi/ic_photo_camera_white_48dp.png" /> />
+        <resource-file src="src/android/drawable-xxxhdpi/ic_photo_size_select_large_white_48dp.png" target="res/drawable-xxxhdpi/ic_photo_size_select_large_white_48dp.png" /> />
+        <resource-file src="src/android/drawable-xxxhdpi/ic_play_circle_outline_white.png" target="res/drawable-xxxhdpi/ic_play_circle_outline_white.png" /> />
+        <resource-file src="src/android/drawable-xxxhdpi/ic_power_settings_new_white_48dp.png" target="res/drawable-xxxhdpi/ic_power_settings_new_white_48dp.png" /> />
+        <resource-file src="src/android/drawable-xxxhdpi/ic_save_white_48dp.png" target="res/drawable-xxxhdpi/ic_save_white_48dp.png" /> />
+        <resource-file src="src/android/drawable-xxxhdpi/ic_text_format_white_48dp.png" target="res/drawable-xxxhdpi/ic_text_format_white_48dp.png" /> />
+        <resource-file src="src/android/drawable-xxxhdpi/ic_timer_white_48dp.png" target="res/drawable-xxxhdpi/ic_timer_white_48dp.png" /> />
+        <resource-file src="src/android/drawable-xxxhdpi/ic_touch_app_white_48dp.png" target="res/drawable-xxxhdpi/ic_touch_app_white_48dp.png" /> />
+        <resource-file src="src/android/drawable-xxxhdpi/ic_videocam_white_48dp.png" target="res/drawable-xxxhdpi/ic_videocam_white_48dp.png" /> />
+        <resource-file src="src/android/layout/activity_capture_media.xml" target="res/layout/activity_capture_media.xml" /> />
+        <resource-file src="src/android/raw/beep.ogg" target="res/raw/beep.ogg" /> />
+        <resource-file src="src/android/raw/beep_hi.ogg" target="res/raw/beep_hi.ogg" /> />
+        <resource-file src="src/android/values/oc_arrays.xml" target="res/values/oc_arrays.xml" /> />
+        <resource-file src="src/android/values/oc_colors.xml" target="res/values/oc_colors.xml" /> />
+        <resource-file src="src/android/values/oc_dimens.xml" target="res/values/oc_dimens.xml" /> />
+        <resource-file src="src/android/values/oc_strings.xml" target="res/values/oc_strings.xml" /> />
+        <resource-file src="src/android/values/oc_styles.xml" target="res/values/oc_styles.xml" /> />
+        <resource-file src="src/android/values-v11/oc_styles.xml" target="res/values-v11/oc_styles.xml" /> />
+        <resource-file src="src/android/values-v14/oc_styles.xml" target="res/values-v14/oc_styles.xml" /> />
+        <resource-file src="src/android/values-v21/oc_styles.xml" target="res/values-v21/oc_styles.xml" /> />
+        <resource-file src="src/android/xml/oc_preferences.xml" target="res/xml/oc_preferences.xml" /> />
 
         <js-module src="www/android/init.js" name="init">
             <runs />

@@ -57,6 +57,8 @@ import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
 
+import com.cordova.mediacapture.OpenCamera.CaptureActivity;
+
 public class Capture extends CordovaPlugin {
 
     private static final String VIDEO_3GPP = "video/3gpp";
@@ -183,7 +185,7 @@ public class Capture extends CordovaPlugin {
     /**
      * Get the Image specific attributes
      *
-     * @param filePath path to the file
+     * @param fileUrl path to the file
      * @param obj represents the Media File Data
      * @return a JSONObject that represents the Media File Data
      * @throws JSONException
@@ -294,7 +296,8 @@ public class Capture extends CordovaPlugin {
         if(cameraPermissionInManifest && !PermissionHelper.hasPermission(this, Manifest.permission.CAMERA)) {
             PermissionHelper.requestPermission(this, req.requestCode, Manifest.permission.CAMERA);
         } else {
-            Intent intent = new Intent(android.provider.MediaStore.ACTION_VIDEO_CAPTURE);
+//            Intent intent = new Intent(android.provider.MediaStore.ACTION_VIDEO_CAPTURE);
+            Intent intent = new Intent(this.cordova.getActivity(), CaptureActivity.class);
 
             if(Build.VERSION.SDK_INT > 7){
                 intent.putExtra("android.intent.extra.durationLimit", req.duration);
