@@ -1,10 +1,10 @@
 {
-  "name": "cordova-plugin-open-caemra",
-  "version": "0.2.2",
+  "name": "cordova-plugin-open-camera",
+  "version": "0.2.3",
   "description": "Media Capture - Open Camera Cordova Plugin",
   "types": "./types/index.d.ts",
   "cordova": {
-    "id": "cordova-plugin-open-caemra",
+    "id": "cordova-plugin-open-camera",
     "platforms": [
       "android",
       "amazon-fireos",
