@@ -4,6 +4,7 @@ import android.media.CamcorderProfile;
 import android.util.Log;
 
 import com.cordova.mediacapture.OpenCamera.CameraController.CameraController;
+import com.cordova.mediacapture.OpenCamera.CaptureActivity;
 import com.cordova.mediacapture.OpenCamera.MyDebug;
 
 import java.io.Serializable;
@@ -151,8 +152,53 @@ public class VideoQualityHandler {
         return this.video_sizes;
     }
 
-    public void setVideoSizes(List<CameraController.Size> video_sizes) {
-        this.video_sizes = video_sizes;
+    public void setVideoSizes(List<CameraController.Size> video_sizes, int limit_videoQuality) {
+        ArrayList<CameraController.Size> sizes = new ArrayList<CameraController.Size>();
+        for( CameraController.Size item : video_sizes){
+            int quality = item.width * item.height;
+            switch (limit_videoQuality){
+                case CaptureActivity.QUALITY_LOW:
+                    if( sizes.size()==0) {
+                        sizes.add(item);
+                    } else {
+                        if( (sizes.get(0).width * sizes.get(0).height) > quality)
+                            sizes.set(0, item);
+                    }
+                    break;
+                case CaptureActivity.QUALITY_HIGH:
+                    sizes.add(item);
+                    break;
+                case CaptureActivity.QUALITY_QCIF:
+                    if( item.width * item.height <= 176*144)
+                        sizes.add(item);
+                    break;
+                case CaptureActivity.QUALITY_CIF:
+                    if( item.width * item.height <= 352*288)
+                        sizes.add(item);
+                    break;
+                case CaptureActivity.QUALITY_480P:
+                    if( item.width * item.height <= 720*480)
+                        sizes.add(item);
+                    break;
+                case CaptureActivity.QUALITY_720P:
+                    if( item.width * item.height <= 1280*720)
+                        sizes.add(item);
+                    break;
+                case CaptureActivity.QUALITY_1080P:
+                    if( item.width * item.height <= 1920*1080)
+                        sizes.add(item);
+                    break;
+                case CaptureActivity.QUALITY_QVGA:
+                    if( item.width * item.height <= 320*240)
+                        sizes.add(item);
+                    break;
+                case CaptureActivity.QUALITY_2160P:
+                    if( item.width * item.height <= 3840*2160)
+                        sizes.add(item);
+                    break;
+            }
+        }
+        this.video_sizes = sizes;
         this.sortVideoSizes();
     }
 

@@ -88,6 +88,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	private final boolean using_android_l;
 
 	private final ApplicationInterface applicationInterface;
+	private final int limit_videoQuality;
 	private final CameraSurface cameraSurface;
 	private CanvasView canvasView;
 	private boolean set_preview_size;
@@ -269,12 +270,13 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	public volatile boolean test_video_failure;
 	public volatile boolean test_ticker_called; // set from MySurfaceView or CanvasView
 
-	public Preview(ApplicationInterface applicationInterface, ViewGroup parent) {
+	public Preview(ApplicationInterface applicationInterface, int limit_videoQuality, ViewGroup parent) {
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "new Preview");
 		}
 
 		this.applicationInterface = applicationInterface;
+		this.limit_videoQuality = limit_videoQuality;
 
 		Activity activity = (Activity)this.getContext();
 		if( activity.getIntent() != null && activity.getIntent().getExtras() != null ) {
@@ -1698,7 +1700,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			this.supports_raw = camera_features.supports_raw;
 			this.view_angle_x = camera_features.view_angle_x;
 			this.view_angle_y = camera_features.view_angle_y;
-			this.video_quality_handler.setVideoSizes(camera_features.video_sizes);
+			this.video_quality_handler.setVideoSizes(camera_features.video_sizes, limit_videoQuality);
 	        this.supported_preview_sizes = camera_features.preview_sizes;
 		}
 		if( MyDebug.LOG ) {

@@ -282,7 +282,7 @@ public class MyApplicationInterface implements ApplicationInterface {
     @Override
 	public boolean isVideoPref() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-		return sharedPreferences.getBoolean(PreferenceKeys.getIsVideoPreferenceKey(), false);
+		return sharedPreferences.getBoolean(PreferenceKeys.getIsVideoPreferenceKey(), true);
     }
 
     @Override

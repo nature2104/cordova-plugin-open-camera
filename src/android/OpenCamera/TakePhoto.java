@@ -3,6 +3,7 @@ package com.cordova.mediacapture.OpenCamera;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.util.Log;
 
 /** Entry Activity for the "take photo" widget (see MyWidgetProviderTakePhoto).
@@ -11,7 +12,7 @@ import android.util.Log;
  */
 public class TakePhoto extends Activity {
 	private static final String TAG = "TakePhoto";
-	public static final String TAKE_PHOTO = "net.sourceforge.opencamera.TAKE_PHOTO";
+	public static final String TAKE_PHOTO = "cordova.mediacapture.OpenCamera.TAKE_PHOTO";
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -21,6 +22,7 @@ public class TakePhoto extends Activity {
 
 		Intent intent = new Intent(this, CaptureActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+		intent.setAction(MediaStore.ACTION_IMAGE_CAPTURE);
 		intent.putExtra(TAKE_PHOTO, true);
 		this.startActivity(intent);
 		if( MyDebug.LOG )

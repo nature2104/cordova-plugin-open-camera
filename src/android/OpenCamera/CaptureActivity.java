@@ -132,6 +132,27 @@ public class CaptureActivity extends Activity implements AudioListener.AudioList
 	public volatile boolean test_have_angle;
 	public volatile float test_angle;
 	public volatile String test_last_saved_image;
+
+	// Same as CamcorderProfile class
+	public static final int QUALITY_LOW  = 0;		//Quality level corresponding to the lowest available resolution.
+	public static final int QUALITY_HIGH = 1;		//Quality level corresponding to the highest available resolution.
+	public static final int QUALITY_QCIF = 2;		//Quality level corresponding to the qcif (176 x 144) resolution.
+	public static final int QUALITY_CIF = 3;		//Quality level corresponding to the cif (352 x 288) resolution.
+	public static final int QUALITY_480P = 4;		//Quality level corresponding to the 480p (720 x 480) resolution.
+													//Note that the horizontal resolution for 480p can also be other
+													//values, such as 640 or 704, instead of 720.
+	public static final int QUALITY_720P = 5;		//Quality level corresponding to the 720p (1280 x 720) resolution.
+
+	public static final int QUALITY_1080P = 6;		// Quality level corresponding to the 1080p (1920 x 1080) resolution.
+													//Note that the vertical resolution for 1080p can also be 1088,
+													//instead of 1080 (used by some vendors to avoid cropping during video playback).
+	public static final int QUALITY_QVGA = 7;		//Quality level corresponding to the QVGA (320x240) resolution.
+	public static final int QUALITY_2160P = 8;		//Quality level corresponding to the 2160p (3840x2160) resolution.
+
+	public static final int DEFAULT_QUALITY = QUALITY_720P;
+
+	private int limit_quality = DEFAULT_QUALITY;
+	private int limit_duration = 0;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -151,6 +172,14 @@ public class CaptureActivity extends Activity implements AudioListener.AudioList
 			// whether called from Take Photo widget
 			if( MyDebug.LOG )
 				Log.d(TAG, "take_photo?: " + getIntent().getExtras().getBoolean(TakePhoto.TAKE_PHOTO));
+			limit_duration = getIntent().getExtras().getInt("android.intent.extra.durationLimit");
+			limit_quality = getIntent().getExtras().getInt("android.intent.extra.videoQuality");
+		}
+		if( getIntent() != null && getIntent().getAction()!=null && getIntent().getAction().equalsIgnoreCase(MediaStore.ACTION_IMAGE_CAPTURE) ){
+			if( MyDebug.LOG )
+				Log.d(TAG, "take_photo: Image Capture action");
+		} else {
+			getIntent().setAction(MediaStore.ACTION_VIDEO_CAPTURE);
 		}
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
@@ -234,7 +263,7 @@ public class CaptureActivity extends Activity implements AudioListener.AudioList
 		mainUI.clearSeekBar();
 
 		// set up the camera and its preview
-        preview = new Preview(applicationInterface, ((ViewGroup) this.findViewById( getResources().getIdentifier("preview", "id", getPackageName()))));
+        preview = new Preview(applicationInterface, limit_quality, ((ViewGroup) this.findViewById( getResources().getIdentifier("preview", "id", getPackageName()))));
 		if( MyDebug.LOG )
 			Log.d(TAG, "onCreate: time after creating preview: " + (System.currentTimeMillis() - debug_time));
 
@@ -922,7 +951,7 @@ public class CaptureActivity extends Activity implements AudioListener.AudioList
 		this.closePopup();
 	    View switchVideoButton = findViewById(getResources().getIdentifier("switch_video", "id", getPackageName()));
 	    switchVideoButton.setEnabled(false); // prevent slowdown if user repeatedly clicks
-		this.preview.switchVideo(false, true);
+		this.preview.switchVideo(false, false);
 		switchVideoButton.setEnabled(true);
 
 		mainUI.setTakePhotoIcon();
