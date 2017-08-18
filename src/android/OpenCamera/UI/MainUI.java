@@ -210,6 +210,8 @@ public class MainUI {
 			layoutParams.addRule(left_of, main_activity.getResources().getIdentifier("gallery", "id", main_activity.getPackageName()));
 			layoutParams.addRule(right_of, 0);
 			view.setLayoutParams(layoutParams);
+			if( !MyDebug.TEST_MODE )
+				view.setVisibility(View.GONE);
 			setViewRotation(view, ui_rotation);
 	
 			view = main_activity.findViewById(main_activity.getResources().getIdentifier("popup", "id", main_activity.getPackageName()));
@@ -590,6 +592,13 @@ public class MainUI {
 				if( MyDebug.LOG ) {
 					Log.d(TAG, "has_zoom: " + main_activity.getPreview().supportsZoom());
 				}
+				if( !MyDebug.TEST_MODE ){
+					Log.d(TAG, "TEST_MODE?: " + MyDebug.TEST_MODE);
+					switchVideoButton.setVisibility(View.GONE);
+					exposureButton.setVisibility(View.GONE);
+					exposureLockButton.setVisibility(View.GONE);
+					settingsButton.setVisibility(View.GONE);
+				}
 				if( main_activity.getPreview().supportsZoom() && sharedPreferences.getBoolean(PreferenceKeys.getShowZoomControlsPreferenceKey(), false) ) {
 					zoomControls.setVisibility(visibility);
 				}
@@ -653,6 +662,13 @@ public class MainUI {
 			    }
 			    if( !main_activity.getPreview().isVideo() || !main_activity.getPreview().supportsFlash() )
 			    	popupButton.setVisibility(visibility); // still allow popup in order to change flash mode when recording video
+
+				if( !MyDebug.TEST_MODE ){
+					Log.d(TAG, "TEST_MODE?: " + MyDebug.TEST_MODE);
+					switchVideoButton.setVisibility(View.GONE);
+					exposureButton.setVisibility(View.GONE);
+					exposureLockButton.setVisibility(View.GONE);
+				}
 			}
 		});
     }

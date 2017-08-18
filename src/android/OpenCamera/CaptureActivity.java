@@ -2540,9 +2540,15 @@ public class CaptureActivity extends Activity implements AudioListener.AudioList
 
 		View exposureButton = findViewById(getResources().getIdentifier("exposure", "id", getPackageName()));
 	    exposureButton.setVisibility(supportsExposureButton() && !mainUI.inImmersiveMode() ? View.VISIBLE : View.GONE);
+		if( !MyDebug.TEST_MODE ){
+			exposureButton.setVisibility(View.GONE);
+		}
 
 	    ImageButton exposureLockButton = (ImageButton) findViewById(getResources().getIdentifier("exposure_lock", "id", getPackageName()));
 	    exposureLockButton.setVisibility(preview.supportsExposureLock() && !mainUI.inImmersiveMode() ? View.VISIBLE : View.GONE);
+		if( !MyDebug.TEST_MODE ){
+			exposureLockButton.setVisibility(View.GONE);
+		}
 	    if( preview.supportsExposureLock() ) {
 			exposureLockButton.setImageResource(preview.isExposureLocked() ? getResources().getIdentifier("exposure_locked", "drawable", getPackageName()) : getResources().getIdentifier("exposure_unlocked", "drawable", getPackageName()));
 	    }

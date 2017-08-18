@@ -5,4 +5,5 @@ package com.cordova.mediacapture.OpenCamera;
  */
 public class MyDebug {
 	public static final boolean LOG = false;
+	public static final boolean TEST_MODE = false;
 }

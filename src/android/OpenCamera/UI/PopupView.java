@@ -171,62 +171,61 @@ public class PopupView extends LinearLayout {
 			if( !current_iso.equals("auto") && supported_isos != null && supported_isos.contains(manual_value) && !supported_isos.contains(current_iso) )
 				current_iso = manual_value;
     		// n.b., we hardcode the string "ISO" as we don't want it translated - firstly more consistent with the ISO values returned by the driver, secondly need to worry about the size of the buttons, so don't want risk of a translated string being too long
-        	addButtonOptionsToPopup(supported_isos, -1, -1, "ISO", current_iso, "TEST_ISO", new ButtonOptionsPopupListener() {
-    			@Override
-    			public void onClick(String option) {
-    				if( MyDebug.LOG )
-    					Log.d(TAG, "clicked iso: " + option);
-    				SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
-    				SharedPreferences.Editor editor = sharedPreferences.edit();
-    				editor.putString(PreferenceKeys.getISOPreferenceKey(), option);
-					String toast_option = option;
-    				if( option.equals("auto") ) {
-        				if( MyDebug.LOG )
-        					Log.d(TAG, "switched from manual to auto iso");
-        				// also reset exposure time when changing from manual to auto from the popup menu:
-    					editor.putLong(PreferenceKeys.getExposureTimePreferenceKey(), CameraController.EXPOSURE_TIME_DEFAULT);
-    				}
-    				else {
-        				if( MyDebug.LOG )
-        					Log.d(TAG, "switched from auto to manual iso");
-						if( option.equals("m") ) {
-							// if we used the generic "manual", then instead try to preserve the current iso if it exists
-							if( preview.getCameraController() != null && preview.getCameraController().captureResultHasIso() ) {
-								int iso = preview.getCameraController().captureResultIso();
-								if( MyDebug.LOG )
-									Log.d(TAG, "apply existing iso of " + iso);
-								editor.putString(PreferenceKeys.getISOPreferenceKey(), "" + iso);
-								toast_option = "" + iso;
+			if( MyDebug.TEST_MODE ) {
+				addButtonOptionsToPopup(supported_isos, -1, -1, "ISO", current_iso, "TEST_ISO", new ButtonOptionsPopupListener() {
+					@Override
+					public void onClick(String option) {
+						if (MyDebug.LOG)
+							Log.d(TAG, "clicked iso: " + option);
+						SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
+						SharedPreferences.Editor editor = sharedPreferences.edit();
+						editor.putString(PreferenceKeys.getISOPreferenceKey(), option);
+						String toast_option = option;
+						if (option.equals("auto")) {
+							if (MyDebug.LOG)
+								Log.d(TAG, "switched from manual to auto iso");
+							// also reset exposure time when changing from manual to auto from the popup menu:
+							editor.putLong(PreferenceKeys.getExposureTimePreferenceKey(), CameraController.EXPOSURE_TIME_DEFAULT);
+						} else {
+							if (MyDebug.LOG)
+								Log.d(TAG, "switched from auto to manual iso");
+							if (option.equals("m")) {
+								// if we used the generic "manual", then instead try to preserve the current iso if it exists
+								if (preview.getCameraController() != null && preview.getCameraController().captureResultHasIso()) {
+									int iso = preview.getCameraController().captureResultIso();
+									if (MyDebug.LOG)
+										Log.d(TAG, "apply existing iso of " + iso);
+									editor.putString(PreferenceKeys.getISOPreferenceKey(), "" + iso);
+									toast_option = "" + iso;
+								} else {
+									if (MyDebug.LOG)
+										Log.d(TAG, "no existing iso available");
+									// use a default
+									final int iso = 800;
+									editor.putString(PreferenceKeys.getISOPreferenceKey(), "" + iso);
+									toast_option = "" + iso;
+								}
 							}
-							else {
-								if( MyDebug.LOG )
-									Log.d(TAG, "no existing iso available");
-								// use a default
-								final int iso = 800;
-								editor.putString(PreferenceKeys.getISOPreferenceKey(), "" + iso);
-								toast_option = "" + iso;
+							if (preview.usingCamera2API()) {
+								// if changing from auto to manual, preserve the current exposure time if it exists
+								if (preview.getCameraController() != null && preview.getCameraController().captureResultHasExposureTime()) {
+									long exposure_time = preview.getCameraController().captureResultExposureTime();
+									if (MyDebug.LOG)
+										Log.d(TAG, "apply existing exposure time of " + exposure_time);
+									editor.putLong(PreferenceKeys.getExposureTimePreferenceKey(), exposure_time);
+								} else {
+									if (MyDebug.LOG)
+										Log.d(TAG, "no existing exposure time available");
+								}
 							}
 						}
-        				if( preview.usingCamera2API() ) {
-        					// if changing from auto to manual, preserve the current exposure time if it exists
-        					if( preview.getCameraController() != null && preview.getCameraController().captureResultHasExposureTime() ) {
-        						long exposure_time = preview.getCameraController().captureResultExposureTime();
-                				if( MyDebug.LOG )
-                					Log.d(TAG, "apply existing exposure time of " + exposure_time);
-            					editor.putLong(PreferenceKeys.getExposureTimePreferenceKey(), exposure_time);
-        					}
-        					else {
-                				if( MyDebug.LOG )
-                					Log.d(TAG, "no existing exposure time available");
-        					}
-        				}
-    				}
-    				editor.apply();
+						editor.apply();
 
-    				main_activity.updateForSettings("ISO: " + toast_option);
-    				main_activity.getMainUI().destroyPopup(); // need to recreate popup for new selection
-    			}
-    		});
+						main_activity.updateForSettings("ISO: " + toast_option);
+						main_activity.getMainUI().destroyPopup(); // need to recreate popup for new selection
+					}
+				});
+			}
 			if( MyDebug.LOG )
 				Log.d(TAG, "PopupView time 5: " + (System.nanoTime() - debug_time));
 
@@ -261,71 +260,68 @@ public class PopupView extends LinearLayout {
     				current_mode = ""; // this will mean no photo mode is highlighted in the UI
     			}
 
-        		addTitleToPopup(getResources().getString(main_activity.getResources().getIdentifier("photo_mode", "string", main_activity.getPackageName())));
-				if( MyDebug.LOG )
-					Log.d(TAG, "PopupView time 6: " + (System.nanoTime() - debug_time));
+    			if( MyDebug.TEST_MODE ) {
+					addTitleToPopup(getResources().getString(main_activity.getResources().getIdentifier("photo_mode", "string", main_activity.getPackageName())));
+					if (MyDebug.LOG)
+						Log.d(TAG, "PopupView time 6: " + (System.nanoTime() - debug_time));
 
-            	addButtonOptionsToPopup(photo_modes, -1, -1, "", current_mode, "TEST_PHOTO_MODE", new ButtonOptionsPopupListener() {
-        			@Override
-        			public void onClick(String option) {
-        				if( MyDebug.LOG )
-        					Log.d(TAG, "clicked photo mode: " + option);
+					addButtonOptionsToPopup(photo_modes, -1, -1, "", current_mode, "TEST_PHOTO_MODE", new ButtonOptionsPopupListener() {
+						@Override
+						public void onClick(String option) {
+							if (MyDebug.LOG)
+								Log.d(TAG, "clicked photo mode: " + option);
 
-        				int option_id = -1;
-        				for(int i=0;i<photo_modes.size() && option_id==-1;i++) {
-        					if( option.equals( photo_modes.get(i) ) )
-        						option_id = i;
-        				}
-        				if( MyDebug.LOG )
-        					Log.d(TAG, "mode id: " + option_id);
-        				if( option_id == -1 ) {
-            				if( MyDebug.LOG )
-            					Log.e(TAG, "unknown mode id: " + option_id);
-        				}
-        				else {
-    						MyApplicationInterface.PhotoMode new_photo_mode = photo_mode_values.get(option_id);
-    						String toast_message = option;
-    						if( new_photo_mode == MyApplicationInterface.PhotoMode.ExpoBracketing )
-    							toast_message = getResources().getString(main_activity.getResources().getIdentifier("photo_mode_expo_bracketing_full", "string", main_activity.getPackageName()));
-    	    				final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
-    						SharedPreferences.Editor editor = sharedPreferences.edit();
-    						if( new_photo_mode == MyApplicationInterface.PhotoMode.Standard ) {
-        						editor.putString(PreferenceKeys.getPhotoModePreferenceKey(), "preference_photo_mode_std");
-    						}
-							else if( new_photo_mode == MyApplicationInterface.PhotoMode.DRO ) {
-								editor.putString(PreferenceKeys.getPhotoModePreferenceKey(), "preference_photo_mode_dro");
+							int option_id = -1;
+							for (int i = 0; i < photo_modes.size() && option_id == -1; i++) {
+								if (option.equals(photo_modes.get(i)))
+									option_id = i;
 							}
-							else if( new_photo_mode == MyApplicationInterface.PhotoMode.HDR ) {
-								editor.putString(PreferenceKeys.getPhotoModePreferenceKey(), "preference_photo_mode_hdr");
+							if (MyDebug.LOG)
+								Log.d(TAG, "mode id: " + option_id);
+							if (option_id == -1) {
+								if (MyDebug.LOG)
+									Log.e(TAG, "unknown mode id: " + option_id);
+							} else {
+								MyApplicationInterface.PhotoMode new_photo_mode = photo_mode_values.get(option_id);
+								String toast_message = option;
+								if (new_photo_mode == MyApplicationInterface.PhotoMode.ExpoBracketing)
+									toast_message = getResources().getString(main_activity.getResources().getIdentifier("photo_mode_expo_bracketing_full", "string", main_activity.getPackageName()));
+								final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
+								SharedPreferences.Editor editor = sharedPreferences.edit();
+								if (new_photo_mode == MyApplicationInterface.PhotoMode.Standard) {
+									editor.putString(PreferenceKeys.getPhotoModePreferenceKey(), "preference_photo_mode_std");
+								} else if (new_photo_mode == MyApplicationInterface.PhotoMode.DRO) {
+									editor.putString(PreferenceKeys.getPhotoModePreferenceKey(), "preference_photo_mode_dro");
+								} else if (new_photo_mode == MyApplicationInterface.PhotoMode.HDR) {
+									editor.putString(PreferenceKeys.getPhotoModePreferenceKey(), "preference_photo_mode_hdr");
+								} else if (new_photo_mode == MyApplicationInterface.PhotoMode.ExpoBracketing) {
+									editor.putString(PreferenceKeys.getPhotoModePreferenceKey(), "preference_photo_mode_expo_bracketing");
+								} else {
+									if (MyDebug.LOG)
+										Log.e(TAG, "unknown new_photo_mode: " + new_photo_mode);
+								}
+								editor.apply();
+
+								boolean done_dialog = false;
+								if (new_photo_mode == MyApplicationInterface.PhotoMode.HDR) {
+									boolean done_hdr_info = sharedPreferences.contains(PreferenceKeys.getHDRInfoPreferenceKey());
+									if (!done_hdr_info) {
+										showInfoDialog(main_activity.getResources().getIdentifier("photo_mode_hdr", "string", main_activity.getPackageName()), main_activity.getResources().getIdentifier("hdr_info", "string", main_activity.getPackageName()), PreferenceKeys.getHDRInfoPreferenceKey());
+										done_dialog = true;
+									}
+								}
+
+								if (done_dialog) {
+									// no need to show toast
+									toast_message = null;
+								}
+
+								main_activity.updateForSettings(toast_message);
+								main_activity.getMainUI().destroyPopup(); // need to recreate popup for new selection
 							}
-    						else if( new_photo_mode == MyApplicationInterface.PhotoMode.ExpoBracketing ) {
-        						editor.putString(PreferenceKeys.getPhotoModePreferenceKey(), "preference_photo_mode_expo_bracketing");
-    						}
-    						else {
-                				if( MyDebug.LOG )
-                					Log.e(TAG, "unknown new_photo_mode: " + new_photo_mode);
-    						}
-    						editor.apply();
-
-    						boolean done_dialog = false;
-    						if( new_photo_mode == MyApplicationInterface.PhotoMode.HDR ) {
-    	            			boolean done_hdr_info = sharedPreferences.contains(PreferenceKeys.getHDRInfoPreferenceKey());
-    	            			if( !done_hdr_info ) {
-    	            				showInfoDialog(main_activity.getResources().getIdentifier("photo_mode_hdr", "string", main_activity.getPackageName()), main_activity.getResources().getIdentifier("hdr_info", "string", main_activity.getPackageName()), PreferenceKeys.getHDRInfoPreferenceKey());
-    		        	    		done_dialog = true;
-    	            			}
-    	                    }
-
-    	            		if( done_dialog ) {
-    	            			// no need to show toast
-    	            			toast_message = null;
-    	            		}
-
-    	    				main_activity.updateForSettings(toast_message);
-		    				main_activity.getMainUI().destroyPopup(); // need to recreate popup for new selection
-        				}
-        			}
-        		});
+						}
+					});
+				}
     		}
 			if( MyDebug.LOG )
 				Log.d(TAG, "PopupView time 7: " + (System.nanoTime() - debug_time));
@@ -430,6 +426,7 @@ public class PopupView extends LinearLayout {
     			String quality_string = preview.getCamcorderProfileDescriptionShort(video_size);
     			video_size_strings.add(quality_string);
     		}
+
     		addArrayOptionsToPopup(video_size_strings, getResources().getString(main_activity.getResources().getIdentifier("video_quality", "string", main_activity.getPackageName())), false, video_size_index, false, "VIDEO_RESOLUTIONS", new ArrayOptionsPopupListener() {
 		    	final Handler handler = new Handler();
 				final Runnable update_runnable = new Runnable() {
@@ -485,35 +482,40 @@ public class PopupView extends LinearLayout {
 					Log.d(TAG, "can't find timer_value " + timer_value + " in timer_values!");
 				timer_index = 0;
     		}
-    		addArrayOptionsToPopup(Arrays.asList(timer_entries), getResources().getString(main_activity.getResources().getIdentifier("preference_timer", "string", main_activity.getPackageName())), true, timer_index, false, "TIMER", new ArrayOptionsPopupListener() {
-    			private void update() {
-    				if( timer_index == -1 )
-    					return;
-    				String new_timer_value = timer_values[timer_index];
-    				SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
-					SharedPreferences.Editor editor = sharedPreferences.edit();
-					editor.putString(PreferenceKeys.getTimerPreferenceKey(), new_timer_value);
-					editor.apply();
-    			}
-				@Override
-				public int onClickPrev() {
-	        		if( timer_index != -1 && timer_index > 0 ) {
-	        			timer_index--;
-	        			update();
-	    				return timer_index;
-	        		}
-					return -1;
-				}
-				@Override
-				public int onClickNext() {
-	                if( timer_index != -1 && timer_index < timer_values.length-1 ) {
-	                	timer_index++;
-	        			update();
-	    				return timer_index;
-	        		}
-					return -1;
-				}
-    		});
+
+			if( MyDebug.TEST_MODE ) {
+				addArrayOptionsToPopup(Arrays.asList(timer_entries), getResources().getString(main_activity.getResources().getIdentifier("preference_timer", "string", main_activity.getPackageName())), true, timer_index, false, "TIMER", new ArrayOptionsPopupListener() {
+					private void update() {
+						if (timer_index == -1)
+							return;
+						String new_timer_value = timer_values[timer_index];
+						SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
+						SharedPreferences.Editor editor = sharedPreferences.edit();
+						editor.putString(PreferenceKeys.getTimerPreferenceKey(), new_timer_value);
+						editor.apply();
+					}
+
+					@Override
+					public int onClickPrev() {
+						if (timer_index != -1 && timer_index > 0) {
+							timer_index--;
+							update();
+							return timer_index;
+						}
+						return -1;
+					}
+
+					@Override
+					public int onClickNext() {
+						if (timer_index != -1 && timer_index < timer_values.length - 1) {
+							timer_index++;
+							update();
+							return timer_index;
+						}
+						return -1;
+					}
+				});
+			}
 			if( MyDebug.LOG )
 				Log.d(TAG, "PopupView time 11: " + (System.nanoTime() - debug_time));
 
@@ -526,35 +528,39 @@ public class PopupView extends LinearLayout {
 					Log.d(TAG, "can't find burst_mode_value " + burst_mode_value + " in burst_mode_values!");
 				burst_mode_index = 0;
     		}
-    		addArrayOptionsToPopup(Arrays.asList(burst_mode_entries), getResources().getString(main_activity.getResources().getIdentifier("preference_burst_mode", "string", main_activity.getPackageName())), true, burst_mode_index, false, "BURST_MODE", new ArrayOptionsPopupListener() {
-    			private void update() {
-    				if( burst_mode_index == -1 )
-    					return;
-    				String new_burst_mode_value = burst_mode_values[burst_mode_index];
-    				SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
-					SharedPreferences.Editor editor = sharedPreferences.edit();
-					editor.putString(PreferenceKeys.getBurstModePreferenceKey(), new_burst_mode_value);
-					editor.apply();
-    			}
-				@Override
-				public int onClickPrev() {
-	        		if( burst_mode_index != -1 && burst_mode_index > 0 ) {
-	        			burst_mode_index--;
-	        			update();
-	    				return burst_mode_index;
-	        		}
-					return -1;
-				}
-				@Override
-				public int onClickNext() {
-	                if( burst_mode_index != -1 && burst_mode_index < burst_mode_values.length-1 ) {
-	                	burst_mode_index++;
-	        			update();
-	    				return burst_mode_index;
-	        		}
-					return -1;
-				}
-    		});
+    		if( MyDebug.TEST_MODE ) {
+				addArrayOptionsToPopup(Arrays.asList(burst_mode_entries), getResources().getString(main_activity.getResources().getIdentifier("preference_burst_mode", "string", main_activity.getPackageName())), true, burst_mode_index, false, "BURST_MODE", new ArrayOptionsPopupListener() {
+					private void update() {
+						if (burst_mode_index == -1)
+							return;
+						String new_burst_mode_value = burst_mode_values[burst_mode_index];
+						SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
+						SharedPreferences.Editor editor = sharedPreferences.edit();
+						editor.putString(PreferenceKeys.getBurstModePreferenceKey(), new_burst_mode_value);
+						editor.apply();
+					}
+
+					@Override
+					public int onClickPrev() {
+						if (burst_mode_index != -1 && burst_mode_index > 0) {
+							burst_mode_index--;
+							update();
+							return burst_mode_index;
+						}
+						return -1;
+					}
+
+					@Override
+					public int onClickNext() {
+						if (burst_mode_index != -1 && burst_mode_index < burst_mode_values.length - 1) {
+							burst_mode_index++;
+							update();
+							return burst_mode_index;
+						}
+						return -1;
+					}
+				});
+			}
 			if( MyDebug.LOG )
 				Log.d(TAG, "PopupView time 12: " + (System.nanoTime() - debug_time));
 
@@ -567,39 +573,44 @@ public class PopupView extends LinearLayout {
 					Log.d(TAG, "can't find grid_value " + grid_value + " in grid_values!");
 				grid_index = 0;
     		}
-    		addArrayOptionsToPopup(Arrays.asList(grid_entries), getResources().getString(main_activity.getResources().getIdentifier("grid", "string", main_activity.getPackageName())), false, grid_index, true, "GRID", new ArrayOptionsPopupListener() {
-    			private void update() {
-    				if( grid_index == -1 )
-    					return;
-    				String new_grid_value = grid_values[grid_index];
-    				SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
-					SharedPreferences.Editor editor = sharedPreferences.edit();
-					editor.putString(PreferenceKeys.getShowGridPreferenceKey(), new_grid_value);
-					editor.apply();
-    			}
-				@Override
-				public int onClickPrev() {
-	        		if( grid_index != -1 ) {
-	        			grid_index--;
-	        			if( grid_index < 0 )
-	        				grid_index += grid_values.length;
-	        			update();
-	    				return grid_index;
-	        		}
-					return -1;
-				}
-				@Override
-				public int onClickNext() {
-	                if( grid_index != -1 ) {
-	                	grid_index++;
-	                	if( grid_index >= grid_values.length )
-	                		grid_index -= grid_values.length;
-	        			update();
-	    				return grid_index;
-	        		}
-					return -1;
-				}
-    		});
+
+    		if( MyDebug.TEST_MODE ) {
+				addArrayOptionsToPopup(Arrays.asList(grid_entries), getResources().getString(main_activity.getResources().getIdentifier("grid", "string", main_activity.getPackageName())), false, grid_index, true, "GRID", new ArrayOptionsPopupListener() {
+					private void update() {
+						if (grid_index == -1)
+							return;
+						String new_grid_value = grid_values[grid_index];
+						SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
+						SharedPreferences.Editor editor = sharedPreferences.edit();
+						editor.putString(PreferenceKeys.getShowGridPreferenceKey(), new_grid_value);
+						editor.apply();
+					}
+
+					@Override
+					public int onClickPrev() {
+						if (grid_index != -1) {
+							grid_index--;
+							if (grid_index < 0)
+								grid_index += grid_values.length;
+							update();
+							return grid_index;
+						}
+						return -1;
+					}
+
+					@Override
+					public int onClickNext() {
+						if (grid_index != -1) {
+							grid_index++;
+							if (grid_index >= grid_values.length)
+								grid_index -= grid_values.length;
+							update();
+							return grid_index;
+						}
+						return -1;
+					}
+				});
+			}
 			if( MyDebug.LOG )
 				Log.d(TAG, "PopupView time 13: " + (System.nanoTime() - debug_time));
 
