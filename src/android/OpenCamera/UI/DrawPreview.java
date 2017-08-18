@@ -882,8 +882,8 @@ public class DrawPreview {
 				}
 			}
 			else if( preview.isVideoRecording() ) {
-            	long video_time = preview.getVideoTime();
-            	String time_s = getTimeStringFromSeconds(video_time/1000);
+            	long remaining_time = preview.getRemainTime();
+            	String time_s = getTimeStringFromSeconds(remaining_time/1000);
             	/*if( MyDebug.LOG )
 					Log.d(TAG, "video_time: " + video_time + " " + time_s);*/
     			p.setTextSize(14 * scale + 0.5f); // convert dps to pixels

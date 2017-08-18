@@ -172,8 +172,8 @@ public class CaptureActivity extends Activity implements AudioListener.AudioList
 			// whether called from Take Photo widget
 			if( MyDebug.LOG )
 				Log.d(TAG, "take_photo?: " + getIntent().getExtras().getBoolean(TakePhoto.TAKE_PHOTO));
-			limit_duration = getIntent().getExtras().getInt("android.intent.extra.durationLimit");
 			limit_quality = getIntent().getExtras().getInt("android.intent.extra.videoQuality");
+			limit_duration = getIntent().getExtras().getInt("android.intent.extra.durationLimit");
 		}
 		if( getIntent() != null && getIntent().getAction()!=null && getIntent().getAction().equalsIgnoreCase(MediaStore.ACTION_IMAGE_CAPTURE) ){
 			if( MyDebug.LOG )
@@ -183,6 +183,19 @@ public class CaptureActivity extends Activity implements AudioListener.AudioList
 		}
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
+		if(limit_duration > 0){
+			SharedPreferences.Editor editor = sharedPreferences.edit();
+			String [] values_array = getResources().getStringArray(getResources().getIdentifier("preference_video_max_duration_values", "array", getPackageName()));
+			Integer duration = Integer.valueOf(values_array[0]);
+			for( String value : values_array){
+				if( Integer.valueOf(value) > limit_duration )
+					break;
+				else
+					duration = Integer.valueOf(value);
+			}
+			editor.putString(PreferenceKeys.getVideoMaxDurationPreferenceKey(), duration.toString());
+			editor.apply();
+		}
 		// determine whether we should support "auto stabilise" feature
 		// risk of running out of memory on lower end devices, due to manipulation of large bitmaps
 		ActivityManager activityManager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
@@ -263,7 +276,7 @@ public class CaptureActivity extends Activity implements AudioListener.AudioList
 		mainUI.clearSeekBar();
 
 		// set up the camera and its preview
-        preview = new Preview(applicationInterface, limit_quality, ((ViewGroup) this.findViewById( getResources().getIdentifier("preview", "id", getPackageName()))));
+        preview = new Preview(applicationInterface, limit_quality, limit_duration, ((ViewGroup) this.findViewById( getResources().getIdentifier("preview", "id", getPackageName()))));
 		if( MyDebug.LOG )
 			Log.d(TAG, "onCreate: time after creating preview: " + (System.currentTimeMillis() - debug_time));
 

@@ -89,6 +89,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 
 	private final ApplicationInterface applicationInterface;
 	private final int limit_videoQuality;
+	private final int limit_duaration;
 	private final CameraSurface cameraSurface;
 	private CanvasView canvasView;
 	private boolean set_preview_size;
@@ -270,13 +271,18 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	public volatile boolean test_video_failure;
 	public volatile boolean test_ticker_called; // set from MySurfaceView or CanvasView
 
-	public Preview(ApplicationInterface applicationInterface, int limit_videoQuality, ViewGroup parent) {
+	public Preview(ApplicationInterface applicationInterface, int limit_videoQuality, int limit_duaration, ViewGroup parent) {
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "new Preview");
 		}
 
 		this.applicationInterface = applicationInterface;
 		this.limit_videoQuality = limit_videoQuality;
+		this.limit_duaration = limit_duaration;
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "limit_duaration: " + limit_duaration);
+			Log.d(TAG, "limit_videoQuality: " + limit_videoQuality);
+		}
 
 		Activity activity = (Activity)this.getContext();
 		if( activity.getIntent() != null && activity.getIntent().getExtras() != null ) {
@@ -5638,6 +5644,17 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		}
 		long time_now = System.currentTimeMillis();
 		return time_now - video_start_time + video_accumulated_time;
+	}
+
+	public long getRemainTime() {
+		long videoTime = getVideoTime();
+		long remainingTime;
+		if( limit_duaration > 0 )
+			remainingTime = limit_duaration*1000 - videoTime + 1000;
+		else
+			remainingTime = videoTime;
+
+		return remainingTime>0? remainingTime : 0;
 	}
 	
 	public long getVideoAccumulatedTime() {
