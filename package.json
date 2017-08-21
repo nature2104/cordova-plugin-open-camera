@@ -1,6 +1,6 @@
 {
   "name": "cordova-plugin-open-camera",
-  "version": "0.2.3",
+  "version": "0.3.5",
   "description": "Media Capture - Open Camera Cordova Plugin",
   "types": "./types/index.d.ts",
   "cordova": {
