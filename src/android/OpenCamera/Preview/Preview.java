@@ -4355,6 +4355,79 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		}
 	}
 
+	public void takeThumbnail(){
+		if( MyDebug.LOG )
+			Log.d(TAG, "takePhoto");
+
+		Handler handler = new Handler();
+		handler.postDelayed(new Runnable(){
+			@Override
+			public void run(){
+				if( MyDebug.LOG )
+					Log.d(TAG, "take picture after delay for next expo");
+
+				CameraController.PictureCallback pictureCallback = new CameraController.PictureCallback() {
+					private boolean success = false; // whether jpeg callback succeeded
+
+					public void onStarted() {
+						if( MyDebug.LOG )
+							Log.d(TAG, "Thumbnail onStarted");
+						//applicationInterface.onCaptureStarted();
+					}
+
+					public void onCompleted() {
+						if( MyDebug.LOG )
+							Log.d(TAG, "Thumbnail onCompleted");
+
+					}
+
+					public void onPictureTaken(byte[] data) {
+						if( MyDebug.LOG )
+							Log.d(TAG, "Thumbnail onPictureTaken");
+						// n.b., this is automatically run in a different thread
+						if( !applicationInterface.onThumbnailTaken(data, applicationInterface.getLastVideoDate()) ) {
+							if( MyDebug.LOG )
+								Log.e(TAG, "applicationInterface.onThumbnailTaken failed");
+							success = false;
+						}
+						else {
+							success = true;
+						}
+					}
+
+					public void onRawPictureTaken(DngCreator dngCreator, Image image) {
+						if( MyDebug.LOG )
+							Log.d(TAG, "Thumbnail onRawPictureTaken");
+						if( !applicationInterface.onRawThumbnailTaken(dngCreator, image, applicationInterface.getLastVideoDate()) ) {
+							if( MyDebug.LOG )
+								Log.e(TAG, "applicationInterface.onRawPictureTaken failed");
+						}
+					}
+
+					public void onBurstPictureTaken(List<byte[]> images) {
+						if( MyDebug.LOG )
+							Log.d(TAG, "Thumbnail onBurstPictureTaken");
+
+						success = false;
+					}
+
+					public void onFrontScreenTurnOn() {
+						if( MyDebug.LOG )
+							Log.d(TAG, "Thumbnail onFrontScreenTurnOn");
+					}
+				};
+				CameraController.ErrorCallback errorCallback = new CameraController.ErrorCallback() {
+					public void onError() {
+						if( MyDebug.LOG )
+							Log.e(TAG, "error from takeThumbnail");
+					}
+				};
+				camera_controller.takeThumbnailNow(pictureCallback, errorCallback);
+
+			}
+		}, 100);
+	}
+
 	/** Take photo. The caller should aready have set the phase to PHASE_TAKING_PHOTO.
 	 */
 	private void takePhoto(boolean skip_autofocus) {

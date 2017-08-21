@@ -70,6 +70,7 @@ public class ImageSaver extends Thread {
 			DUMMY
 		}
 		Type type = Type.JPEG;
+		final boolean is_thumbnail;
 		final boolean is_hdr; // for jpeg
 		final boolean save_expo; // for is_hdr
 		/* jpeg_images: for jpeg (may be null otherwise).
@@ -103,7 +104,8 @@ public class ImageSaver extends Thread {
 		final double geo_direction;
 		int sample_factor = 1; // sampling factor for thumbnail, higher means lower quality
 		
-		Request(Type type,
+		Request(boolean is_thumbnail,
+			Type type,
 			boolean is_hdr,
 			boolean save_expo,
 			List<byte []> jpeg_images,
@@ -117,6 +119,7 @@ public class ImageSaver extends Thread {
 			String preference_stamp, String preference_textstamp, int font_size, int color, String pref_style, String preference_stamp_dateformat, String preference_stamp_timeformat, String preference_stamp_gpsformat,
 			boolean store_location, Location location, boolean store_geo_direction, double geo_direction,
 			int sample_factor) {
+			this.is_thumbnail = is_thumbnail;
 			this.type = type;
 			this.is_hdr = is_hdr;
 			this.save_expo = save_expo;
@@ -160,8 +163,8 @@ public class ImageSaver extends Thread {
 		if( MyDebug.LOG )
 			Log.d(TAG, "onDestroy");
 	}
-	@Override
 
+	@Override
 	public void run() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "starting ImageSaver thread...");
@@ -244,7 +247,46 @@ public class ImageSaver extends Thread {
 			Log.d(TAG, "do_in_background? " + do_in_background);
 			Log.d(TAG, "number of images: " + images.size());
 		}
-		return saveImage(do_in_background,
+		return saveImage(false, do_in_background,
+				false,
+				is_hdr,
+				save_expo,
+				images,
+				null, null,
+				image_capture_intent, image_capture_intent_uri,
+				using_camera2, image_quality,
+				do_auto_stabilise, level_angle,
+				is_front_facing,
+				mirror,
+				current_date,
+				preference_stamp, preference_textstamp, font_size, color, pref_style, preference_stamp_dateformat, preference_stamp_timeformat, preference_stamp_gpsformat,
+				store_location, location, store_geo_direction, geo_direction,
+				sample_factor);
+	}/** Saves a photo.
+	 *  If do_in_background is true, the photo will be saved in a background thread. If the queue is full, the function will wait
+	 *  until it isn't full. Otherwise it will return immediately. The function always returns true for background saving.
+	 *  If do_in_background is false, the photo is saved on the current thread, and the function returns whether the photo was saved
+	 *  successfully.
+	 */
+	boolean saveThumbnailJpeg(boolean do_in_background,
+						  boolean is_hdr,
+						  boolean save_expo,
+						  List<byte []> images,
+						  boolean image_capture_intent, Uri image_capture_intent_uri,
+						  boolean using_camera2, int image_quality,
+						  boolean do_auto_stabilise, double level_angle,
+						  boolean is_front_facing,
+						  boolean mirror,
+						  Date current_date,
+						  String preference_stamp, String preference_textstamp, int font_size, int color, String pref_style, String preference_stamp_dateformat, String preference_stamp_timeformat, String preference_stamp_gpsformat,
+						  boolean store_location, Location location, boolean store_geo_direction, double geo_direction,
+						  int sample_factor) {
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "saveThumbnailJpeg");
+			Log.d(TAG, "do_in_background? " + do_in_background);
+			Log.d(TAG, "number of images: " + images.size());
+		}
+		return saveImage(true, do_in_background,
 				false,
 				is_hdr,
 				save_expo,
@@ -274,7 +316,31 @@ public class ImageSaver extends Thread {
 			Log.d(TAG, "saveImageRaw");
 			Log.d(TAG, "do_in_background? " + do_in_background);
 		}
-		return saveImage(do_in_background,
+		return saveImage(false, do_in_background,
+				true,
+				false,
+				false,
+				null,
+				dngCreator, image,
+				false, null,
+				false, 0,
+				true, 0.0,
+				false,
+				false,
+				current_date,
+				null, null, 0, 0, null, null, null, null,
+				false, null, false, 0.0,
+				1);
+	}
+
+	boolean saveThumbnailRaw(boolean do_in_background,
+						 DngCreator dngCreator, Image image,
+						 Date current_date) {
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "saveThumbnailRaw");
+			Log.d(TAG, "do_in_background? " + do_in_background);
+		}
+		return saveImage(true, do_in_background,
 				true,
 				false,
 				false,
@@ -293,7 +359,7 @@ public class ImageSaver extends Thread {
 
 	/** Internal saveImage method to handle both JPEG and RAW.
 	 */
-	private boolean saveImage(boolean do_in_background,
+	private boolean saveImage(boolean is_thumbnail, boolean do_in_background,
 			boolean is_raw,
 			boolean is_hdr,
 			boolean save_expo,
@@ -316,7 +382,8 @@ public class ImageSaver extends Thread {
 		
 		//do_in_background = false;
 		
-		Request request = new Request(is_raw ? Request.Type.RAW : Request.Type.JPEG,
+		Request request = new Request(is_thumbnail,
+				is_raw ? Request.Type.RAW : Request.Type.JPEG,
 				is_hdr,
 				save_expo,
 				jpeg_images,
@@ -340,7 +407,8 @@ public class ImageSaver extends Thread {
 				// (arguably it should have a cost of 3, to reflect the 3 JPEGs, but one can consider this comparable to RAW+JPEG, which have a cost
 				// of 2, due to RAW and JPEG each needing their own request).
 				// Similarly for saving multiple images (expo-bracketing)
-				Request dummy_request = new Request(Request.Type.DUMMY,
+				Request dummy_request = new Request(is_thumbnail,
+                    Request.Type.DUMMY,
 					false,
 					false,
 					null,
@@ -705,7 +773,11 @@ public class ImageSaver extends Thread {
 				}
 			}
 			else {
-				success = saveSingleImageNow(request, request.jpeg_images.get(0), null, "", true, true);
+                if( request.is_thumbnail ){
+                    success = saveSingleImageNow(request, request.jpeg_images.get(0), null, "", false, false);
+                } else {
+                    success = saveSingleImageNow(request, request.jpeg_images.get(0), null, "", true, true);
+                }
 			}
 		}
 
@@ -1189,10 +1261,16 @@ public class ImageSaver extends Thread {
     			}
 			}
 			else if( storageUtils.isUsingSAF() ) {
-				saveUri = storageUtils.createOutputMediaFileSAF(StorageUtils.MEDIA_TYPE_IMAGE, filename_suffix, "jpg", current_date);
+                if( request.is_thumbnail )
+                    saveUri = storageUtils.createOutputMediaFileSAF(StorageUtils.MEDIA_TYPE_THUMB, filename_suffix, "jpg", current_date);
+                else
+				    saveUri = storageUtils.createOutputMediaFileSAF(StorageUtils.MEDIA_TYPE_IMAGE, filename_suffix, "jpg", current_date);
 			}
 			else {
-    			picFile = storageUtils.createOutputMediaFile(StorageUtils.MEDIA_TYPE_IMAGE, filename_suffix, "jpg", current_date);
+                if( request.is_thumbnail )
+                    picFile = storageUtils.createOutputMediaFile(StorageUtils.MEDIA_TYPE_THUMB, filename_suffix, "jpg", current_date);
+                else
+    			    picFile = storageUtils.createOutputMediaFile(StorageUtils.MEDIA_TYPE_IMAGE, filename_suffix, "jpg", current_date);
 	    		if( MyDebug.LOG )
 	    			Log.d(TAG, "save to: " + picFile.getAbsolutePath());
 			}
@@ -1291,16 +1369,16 @@ public class ImageSaver extends Thread {
 
     	            if( saveUri == null ) {
     	            	// broadcast for SAF is done later, when we've actually written out the file
-    	            	storageUtils.broadcastFile(picFile, true, false, update_thumbnail);
+    	            	storageUtils.broadcastFile(picFile, true, false, update_thumbnail, !request.is_thumbnail);
     	            	main_activity.test_last_saved_image = picFile.getAbsolutePath();
     	            }
 	            }
-	            if( image_capture_intent ) {
-    	    		if( MyDebug.LOG )
-    	    			Log.d(TAG, "finish activity due to being called from intent");
-	            	main_activity.setResult(Activity.RESULT_OK);
-	            	main_activity.finish();
-	            }
+//	            if( image_capture_intent ) {
+//    	    		if( MyDebug.LOG )
+//    	    			Log.d(TAG, "finish activity due to being called from intent");
+//	            	main_activity.setResult(Activity.RESULT_OK);
+//	            	main_activity.finish();
+//	            }
 	            if( storageUtils.isUsingSAF() ) {
 	            	// most Gallery apps don't seem to recognise the SAF-format Uri, so just clear the field
 	            	storageUtils.clearLastMediaScanned();
@@ -1324,7 +1402,7 @@ public class ImageSaver extends Thread {
                     if( real_file != null ) {
     					if( MyDebug.LOG )
     						Log.d(TAG, "broadcast file");
-    	            	storageUtils.broadcastFile(real_file, true, false, true);
+    	            	storageUtils.broadcastFile(real_file, true, false, true, !request.is_thumbnail);
     	            	main_activity.test_last_saved_image = real_file.getAbsolutePath();
                     }
                     else if( !image_capture_intent ) {
@@ -1847,7 +1925,7 @@ public class ImageSaver extends Thread {
     			success = true;
         		//Uri media_uri = storageUtils.broadcastFileRaw(picFile, current_date, location);
     		    //storageUtils.announceUri(media_uri, true, false);    			
-            	storageUtils.broadcastFile(picFile, true, false, false);
+            	storageUtils.broadcastFile(picFile, true, false, false, true);
     		}
     		else {
     		    success = true;
@@ -1859,7 +1937,7 @@ public class ImageSaver extends Thread {
 						Log.d(TAG, "broadcast file");
 	        		//Uri media_uri = storageUtils.broadcastFileRaw(real_file, current_date, location);
 	    		    //storageUtils.announceUri(media_uri, true, false);
-	    		    storageUtils.broadcastFile(real_file, true, false, false);
+	    		    storageUtils.broadcastFile(real_file, true, false, false, true);
                 }
                 else {
 					if( MyDebug.LOG )

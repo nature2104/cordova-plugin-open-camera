@@ -41,6 +41,7 @@ public interface ApplicationInterface {
 	File createOutputVideoFile() throws IOException; // will be called if createOutputVideoUsingSAF() returns VIDEOMETHOD_FILE
 	Uri createOutputVideoSAF() throws IOException; // will be called if createOutputVideoUsingSAF() returns VIDEOMETHOD_SAF
 	Uri createOutputVideoUri(); // will be called if createOutputVideoUsingSAF() returns VIDEOMETHOD_URI
+	Date getLastVideoDate();
 	// for all of the get*Pref() methods, you can use Preview methods to get the supported values (e.g., getSupportedSceneModes())
 	// if you just want a default or don't really care, see the comments for each method for a default or possible options
 	// if Preview doesn't support the requested setting, it will check this, and choose its own
@@ -160,4 +161,7 @@ public interface ApplicationInterface {
 	void onCaptureStarted(); // called immediately before we start capturing the picture
 	void onPictureCompleted(); // called after all picture callbacks have been called and returned
 	void onContinuousFocusMove(boolean start); // called when focusing starts/stop in continuous picture mode (in photo mode only)
+
+	boolean onRawThumbnailTaken(DngCreator dngCreator, Image image, Date current_date);
+	boolean onThumbnailTaken(byte [] data, Date current_date);
 }

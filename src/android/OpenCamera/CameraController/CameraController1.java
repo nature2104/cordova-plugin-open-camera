@@ -1488,6 +1488,38 @@ public class CameraController1 extends CameraController {
 		}
 	}
 
+	public void takeThumbnailNow(final CameraController.PictureCallback picture, final ErrorCallback error) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "takeThumbnailNow");
+
+		final Camera.PictureCallback camera_jpeg = picture == null ? null : new Camera.PictureCallback() {
+			public void onPictureTaken(byte[] data, Camera cam) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "Thumbnail onPictureTaken");
+
+				picture.onPictureTaken(data);
+				picture.onCompleted();
+			}
+		};
+
+		if( picture != null ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "call onStarted() in callback");
+			picture.onStarted();
+		}
+		try {
+			camera.takePicture(null, null, camera_jpeg);
+		}
+		catch(RuntimeException e) {
+			// just in case? We got a RuntimeException report here from 1 user on Google Play; I also encountered it myself once of Galaxy Nexus when starting up
+			if( MyDebug.LOG )
+				Log.e(TAG, "runtime exception from Thumbnail");
+			e.printStackTrace();
+			error.onError();
+		}
+	}
+
+	@Override
 	public void takePicture(final CameraController.PictureCallback picture, final ErrorCallback error) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "takePicture");

@@ -3928,6 +3928,66 @@ public class CameraController2 extends CameraController {
 		}
 		return fake_precapture_use_flash;
 	}
+
+
+	public void takeThumbnailNow(final CameraController.PictureCallback picture, final ErrorCallback error) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "takeThumbnailNow");
+
+		if( camera == null || captureSession == null ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "no camera or capture session");
+			error.onError();
+			return;
+		}
+		// we store as two identical callbacks, so we can independently set each to null as the two callbacks occur
+		this.jpeg_cb = picture;
+		this.raw_cb = null;
+
+		this.take_picture_error_cb = error;
+		this.fake_precapture_torch_performed = false; // just in case still on?
+
+
+		{
+			try {
+				// use a separate builder for precapture - otherwise have problem that if we take photo with flash auto/on of dark scene, then point to a bright scene, the autoexposure isn't running until we autofocus again
+				final CaptureRequest.Builder precaptureBuilder = camera.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE);
+				precaptureBuilder.set(CaptureRequest.CONTROL_CAPTURE_INTENT, CaptureRequest.CONTROL_CAPTURE_INTENT_STILL_CAPTURE);
+
+				camera_settings.setupBuilder(precaptureBuilder, false);
+				precaptureBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_IDLE);
+				precaptureBuilder.set(CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER, CameraMetadata.CONTROL_AE_PRECAPTURE_TRIGGER_IDLE);
+
+				precaptureBuilder.addTarget(getPreviewSurface());
+
+				state = STATE_WAITING_PRECAPTURE_START;
+				precapture_state_change_time_ms = System.currentTimeMillis();
+
+				// first set precapture to idle - this is needed, otherwise we hang in state STATE_WAITING_PRECAPTURE_START, because precapture already occurred whilst autofocusing, and it doesn't occur again unless we first set the precapture trigger to idle
+				if( MyDebug.LOG )
+					Log.d(TAG, "capture with precaptureBuilder");
+				captureSession.capture(precaptureBuilder.build(), previewCaptureCallback, handler);
+				captureSession.setRepeatingRequest(precaptureBuilder.build(), previewCaptureCallback, handler);
+
+				// now set precapture
+				precaptureBuilder.set(CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER, CameraMetadata.CONTROL_AE_PRECAPTURE_TRIGGER_START);
+				captureSession.capture(precaptureBuilder.build(), previewCaptureCallback, handler);
+			}
+			catch(CameraAccessException e) {
+				if( MyDebug.LOG ) {
+					Log.e(TAG, "failed to precapture");
+					Log.e(TAG, "reason: " + e.getReason());
+					Log.e(TAG, "message: " + e.getMessage());
+				}
+				e.printStackTrace();
+				jpeg_cb = null;
+				if( take_picture_error_cb != null ) {
+					take_picture_error_cb.onError();
+					take_picture_error_cb = null;
+				}
+			}
+		}
+	}
 	
 	@Override
 	public void takePicture(final PictureCallback picture, final ErrorCallback error) {

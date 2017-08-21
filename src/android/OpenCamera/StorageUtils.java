@@ -41,6 +41,7 @@ public class StorageUtils {
 
     static final int MEDIA_TYPE_IMAGE = 1;
     static final int MEDIA_TYPE_VIDEO = 2;
+	static final int MEDIA_TYPE_THUMB = 3;
 
 	private final Context context;
     private Uri last_media_scanned;
@@ -201,7 +202,7 @@ public class StorageUtils {
 	 *    This may well be intentional, since most gallery applications won't read DNG files anyway. But it's still important to
 	 *    call this function for DNGs, so that they show up on MTP.
 	 */
-    public void broadcastFile(final File file, final boolean is_new_picture, final boolean is_new_video, final boolean set_last_scanned) {
+    public void broadcastFile(final File file, final boolean is_new_picture, final boolean is_new_video, final boolean set_last_scanned, final boolean should_finish) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "broadcastFile: " + file.getAbsolutePath());
     	// note that the new method means that the new folder shows up as a file when connected to a PC via MTP (at least tested on Windows 8)
@@ -234,16 +235,19 @@ public class StorageUtils {
 
     	    			// it seems caller apps seem to prefer the content:// Uri rather than one based on a File
 						// update for Android 7: seems that passing file uris is now restricted anyway, see https://code.google.com/p/android/issues/detail?id=203555
-    		 			Activity activity = (Activity)context;
-    		 			String action = activity.getIntent().getAction();
-    		 	        if( MediaStore.ACTION_VIDEO_CAPTURE.equals(action) ) {
-    		    			if( MyDebug.LOG )
-    		    				Log.d(TAG, "from video capture intent");
-	    		 			Intent output = new Intent();
-	    		 			output.setData(uri);
-	    		 			activity.setResult(Activity.RESULT_OK, output);
-	    		 			activity.finish();
-    		 	        }
+						if( should_finish ) {
+							Activity activity = (Activity) context;
+							String action = activity.getIntent().getAction();
+							if (MediaStore.ACTION_VIDEO_CAPTURE.equals(action)) {
+								if (MyDebug.LOG)
+									Log.d(TAG, "from video capture intent");
+								Intent output = new Intent();
+								output.setData(uri);
+								// TODO: activity.test_last_saved_image is Thumbnail image. Please send it
+								activity.setResult(Activity.RESULT_OK, output);
+								activity.finish();
+							}
+						}
     		 		}
     			}
     		);
@@ -453,6 +457,10 @@ public class StorageUtils {
     		String prefix = sharedPreferences.getString(PreferenceKeys.getSaveVideoPrefixPreferenceKey(), "VID_");
     		mediaFilename = prefix + timeStamp + suffix + index + "." + extension;
         }
+        else if( type == MEDIA_TYPE_THUMB ) {
+			String prefix = sharedPreferences.getString(PreferenceKeys.getSaveThumnailPrefixPreferenceKey(), "THU_");
+			mediaFilename = prefix + timeStamp + suffix + index + "." + extension;
+		}
         else {
         	// throw exception as this is a programming error
     		if( MyDebug.LOG )
@@ -474,7 +482,7 @@ public class StorageUtils {
         			Log.e(TAG, "failed to create directory");
         		throw new IOException();
             }
-            broadcastFile(mediaStorageDir, false, false, false);
+            broadcastFile(mediaStorageDir, false, false, false, false);
         }
 
         // Create a media file name
@@ -542,6 +550,9 @@ public class StorageUtils {
 			}
 			else
 				mimeType = "image/jpeg";
+		}
+		else if( type == MEDIA_TYPE_THUMB ) {
+			mimeType = "image/jpeg";
 		}
 		else if( type == MEDIA_TYPE_VIDEO ) {
 			mimeType = "video/mp4";

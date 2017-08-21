@@ -68,6 +68,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 	private final DrawPreview drawPreview;
 	private final ImageSaver imageSaver;
 
+	private Date last_video_date = null;
 	private File last_video_file = null;
 	private Uri last_video_file_saf = null;
 
@@ -233,18 +234,21 @@ public class MyApplicationInterface implements ApplicationInterface {
 
 	@Override
 	public File createOutputVideoFile() throws IOException {
-		last_video_file = storageUtils.createOutputMediaFile(StorageUtils.MEDIA_TYPE_VIDEO, "", "mp4", new Date());
+		last_video_date = new Date();
+		last_video_file = storageUtils.createOutputMediaFile(StorageUtils.MEDIA_TYPE_VIDEO, "", "mp4", last_video_date);
 		return last_video_file;
 	}
 
 	@Override
 	public Uri createOutputVideoSAF() throws IOException {
-		last_video_file_saf = storageUtils.createOutputMediaFileSAF(StorageUtils.MEDIA_TYPE_VIDEO, "", "mp4", new Date());
+		last_video_date = new Date();
+		last_video_file_saf = storageUtils.createOutputMediaFileSAF(StorageUtils.MEDIA_TYPE_VIDEO, "", "mp4", last_video_date);
 		return last_video_file_saf;
 	}
 
 	@Override
 	public Uri createOutputVideoUri() {
+		last_video_date = new Date();
         String action = main_activity.getIntent().getAction();
         if( MediaStore.ACTION_VIDEO_CAPTURE.equals(action) ) {
 			if( MyDebug.LOG )
@@ -260,6 +264,11 @@ public class MyApplicationInterface implements ApplicationInterface {
 	        }
         }
         throw new RuntimeException(); // programming error if we arrived here
+	}
+
+	@Override
+	public Date getLastVideoDate() {
+		return last_video_date;
 	}
 
 	@Override
@@ -1016,6 +1025,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 			}
 			main_activity.getMainUI().setPauseVideoContentDescription();
 		}
+		main_activity.getPreview().takeThumbnail();
 		final int video_method = this.createOutputVideoMethod();
 		boolean dategeo_subtitles = getVideoSubtitlePref().equals("preference_video_subtitle_yes");
 		if( dategeo_subtitles && video_method != ApplicationInterface.VIDEOMETHOD_URI ) {
@@ -1193,7 +1203,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 		if( video_method == VIDEOMETHOD_FILE ) {
 			if( filename != null ) {
 				File file = new File(filename);
-				storageUtils.broadcastFile(file, false, true, true);
+				storageUtils.broadcastFile(file, false, true, true, true);
 				done = true;
 			}
 		}
@@ -1204,7 +1214,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 				if( MyDebug.LOG )
 					Log.d(TAG, "real_file: " + real_file);
 				if( real_file != null ) {
-					storageUtils.broadcastFile(real_file, false, true, true);
+					storageUtils.broadcastFile(real_file, false, true, true, true);
 					main_activity.test_last_saved_image = real_file.getAbsolutePath();
 				}
 				else {
@@ -1878,6 +1888,65 @@ public class MyApplicationInterface implements ApplicationInterface {
 		return success;
 	}
 
+	private boolean saveThumbnail(boolean is_hdr, boolean save_expo, List<byte []> images, Date current_date) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "saveThumbnail");
+
+		System.gc();
+
+		Uri image_capture_intent_uri = null;
+
+		boolean using_camera2 = main_activity.getPreview().usingCamera2API();
+		int image_quality = 80; //getSaveImageQualityPref();	// 10-100 % for JPEG
+
+		if( main_activity.getIntent() != null) {
+			Bundle myExtras = main_activity.getIntent().getExtras();
+			if (myExtras != null) {
+				if( myExtras.getParcelable("Thumb_Quality") != null)
+				image_quality = myExtras.getParcelable("Thumb_Quality");
+			}
+		}
+		if( MyDebug.LOG )
+			Log.d(TAG, "Thumb_Quality: " + image_quality);
+
+		boolean do_auto_stabilise = getAutoStabilisePref() && main_activity.getPreview().hasLevelAngle();
+		double level_angle = do_auto_stabilise ? main_activity.getPreview().getLevelAngle() : 0.0;
+		if( do_auto_stabilise && main_activity.test_have_angle )
+			level_angle = main_activity.test_angle;
+		if( do_auto_stabilise && main_activity.test_low_memory )
+			level_angle = 45.0;
+		// I have received crashes where camera_controller was null - could perhaps happen if this thread was running just as the camera is closing?
+		boolean is_front_facing = main_activity.getPreview().getCameraController() != null && main_activity.getPreview().getCameraController().isFrontFacing();
+		boolean mirror = is_front_facing && true;
+
+		boolean do_in_background = true; //saveInBackground(false);
+
+		int sample_factor = 1;
+		if( !this.getPausePreviewPref() ) {
+			// if pausing the preview, we use the thumbnail also for the preview, so don't downsample
+			// otherwise, we can downsample by 4 to increase performance, without noticeable loss in visual quality (even for the thumbnail animation)
+			sample_factor *= 4;
+		}
+		if( MyDebug.LOG )
+			Log.d(TAG, "sample_factor: " + sample_factor);
+
+		boolean success = imageSaver.saveThumbnailJpeg(do_in_background, is_hdr, save_expo, images,
+				false, image_capture_intent_uri,
+				using_camera2, image_quality,
+				do_auto_stabilise, level_angle,
+				is_front_facing,
+				mirror,
+				current_date,
+				"preference_stamp_no", "", 0, 0, null, null, null, null,
+				false, null, false, 0.0,
+				sample_factor);
+
+		if( MyDebug.LOG )
+			Log.d(TAG, "saveThumbnail complete, success: " + success);
+
+		return success;
+	}
+
     @Override
 	public boolean onPictureTaken(byte [] data, Date current_date) {
 		if( MyDebug.LOG )
@@ -1944,8 +2013,42 @@ public class MyApplicationInterface implements ApplicationInterface {
 			Log.d(TAG, "onRawPictureTaken complete");
 		return success;
 	}
-    
-    void addLastImage(File file, boolean share) {
+
+
+
+	@Override
+	public boolean onRawThumbnailTaken(DngCreator dngCreator, Image image, Date current_date) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "onRawThumbnailTaken");
+		System.gc();
+
+		boolean do_in_background = saveInBackground(false);
+
+		boolean success = imageSaver.saveThumbnailRaw(do_in_background, dngCreator, image, current_date);
+
+		if( MyDebug.LOG )
+			Log.d(TAG, "onRawThumbnailTaken complete");
+		return success;
+	}
+
+	@Override
+	public boolean onThumbnailTaken(byte [] data, Date current_date) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "onThumbnailTaken");
+
+		List<byte []> images = new ArrayList<byte []>();
+		images.add(data);
+
+		boolean success = saveThumbnail(false, false, images, current_date);
+
+		if( MyDebug.LOG )
+			Log.d(TAG, "onThumbnailTaken complete, success: " + success);
+
+		return success;
+	}
+
+
+	void addLastImage(File file, boolean share) {
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "addLastImage: " + file);
 			Log.d(TAG, "share?: " + share);
@@ -2018,7 +2121,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 	    	    preview.showToast(null, main_activity.getResources().getIdentifier("photo_deleted", "string", main_activity.getPackageName()));
                 if( file != null ) {
                 	// SAF doesn't broadcast when deleting them
-	            	storageUtils.broadcastFile(file, false, false, true);
+	            	storageUtils.broadcastFile(file, false, false, true, true);
                 }
 			}
 		}
@@ -2034,7 +2137,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 				if( MyDebug.LOG )
 					Log.d(TAG, "successfully deleted " + image_name);
 	    	    preview.showToast(null, main_activity.getResources().getIdentifier("photo_deleted", "string", main_activity.getPackageName()));
-            	storageUtils.broadcastFile(file, false, false, true);
+            	storageUtils.broadcastFile(file, false, false, true, true);
 			}
 		}
 	}

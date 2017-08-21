@@ -2169,27 +2169,12 @@ public class CaptureActivity extends Activity implements AudioListener.AudioList
 		applicationInterface.trashLastImage();
     }
 
-    private final boolean test_panorama = false;
-
 	/** User has pressed the take picture button, or done an equivalent action to request this (e.g.,
 	 *  volume buttons, audio trigger).
 	 */
     public void takePicture() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "takePicture");
-
-		if( test_panorama ) {
-			if (applicationInterface.getGyroSensor().isRecording()) {
-				if (MyDebug.LOG)
-					Log.d(TAG, "panorama complete");
-				applicationInterface.stopPanorama();
-				return;
-			} else {
-				if (MyDebug.LOG)
-					Log.d(TAG, "start panorama");
-				applicationInterface.startPanorama();
-			}
-		}
 
 		this.takePicturePressed();
     }

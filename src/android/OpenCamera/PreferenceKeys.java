@@ -246,6 +246,10 @@ public class PreferenceKeys {
     public static String getSaveVideoPrefixPreferenceKey() {
     	return "preference_save_video_prefix";
     }
+
+    public static String getSaveThumnailPrefixPreferenceKey() {
+        return "preference_save_thumbnail_prefix";
+    }
     
     public static String getSaveZuluTimePreferenceKey() {
     	return "preference_save_zulu_time";

@@ -309,6 +309,7 @@ public abstract class CameraController {
 	public abstract void reconnect() throws CameraControllerException;
 	public abstract void setPreviewDisplay(SurfaceHolder holder) throws CameraControllerException;
 	public abstract void setPreviewTexture(SurfaceTexture texture) throws CameraControllerException;
+	public abstract void takeThumbnailNow(final CameraController.PictureCallback picture, final ErrorCallback error);
 	/** Starts the camera preview.
 	 *  @throws CameraControllerException if the camera preview fails to start.
      */
