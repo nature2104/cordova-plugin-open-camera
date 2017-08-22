@@ -1242,9 +1242,15 @@ public class MyApplicationInterface implements ApplicationInterface {
 					// n.b., currently this code is not used, as we always switch to VIDEOMETHOD_FILE if the calling application didn't specify a Uri, but I've left this here for possible future behaviour
 					if( video_method == VIDEOMETHOD_SAF ) {
 						output = new Intent();
-						output.setData(uri);
+						//output.setData(uri);
+						Uri thumbUri = null;
+						if( main_activity.test_last_saved_image !=null && !main_activity.test_last_saved_image.isEmpty()) {
+							thumbUri = Uri.fromFile(new File(main_activity.test_last_saved_image));
+						}
+						output.putExtra("videoUri", uri);
+						output.putExtra("thumbUri", thumbUri);
 						if( MyDebug.LOG )
-							Log.d(TAG, "pass back output uri [saf]: " + output.getData());
+							Log.d(TAG, "pass back output uri [saf]: " + output.getExtras());
 					}
 				}
 				main_activity.setResult(done ? Activity.RESULT_OK : Activity.RESULT_CANCELED, output);

@@ -122,6 +122,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	private boolean is_video;
 	private volatile MediaRecorder video_recorder; // must be volatile for test project reading the state
 	private volatile boolean video_start_time_set; // must be volatile for test project reading the state
+	private int start_video_orientation;
 	private long video_start_time; // when the video recording was started, or last resumed if it's was paused
 	private long video_accumulated_time; // this time should be added to (System.currentTimeMillis() - video_start_time) to find the true video duration, that takes into account pausing/resuming, as well as any auto-restarts from max filesize
 	private boolean video_recorder_is_paused; // whether video_recorder is running but has paused
@@ -4146,7 +4147,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         		/*if( true ) // test
         			throw new IOException();*/
 				cameraSurface.setVideoRecorder(video_recorder);
-				video_recorder.setOrientationHint(getImageVideoRotation());
+				start_video_orientation = getImageVideoRotation();
+				video_recorder.setOrientationHint(start_video_orientation);
 				if( MyDebug.LOG )
 					Log.d(TAG, "about to prepare video recorder");
 				video_recorder.prepare();
@@ -5252,6 +5254,12 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			Log.d(TAG, "supportsVideoStabilization");
     	return supports_video_stabilization;
     }
+
+	public int getVideoOrientation() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "getVideoOrientation");
+		return start_video_orientation;
+	}
     
     public boolean canDisableShutterSound() {
 		if( MyDebug.LOG )

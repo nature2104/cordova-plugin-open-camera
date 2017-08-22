@@ -397,14 +397,16 @@ public class Capture extends CordovaPlugin {
 
     public void onVideoActivityResult(Request req, Intent intent) {
         Uri data = null;
+        Uri thumbData = null;
 
         if (intent != null){
             // Get the uri of the video clip
-            data = intent.getData();
+            data = intent.getParcelableExtra("videoUri"); //intent.getData();
+            thumbData = intent.getParcelableExtra("thumbUri");
         }
 
         if( data == null){
-            File movie = new File(getTempDirectoryPath(), "Capture.avi");
+            File movie = new File(getTempDirectoryPath(), "Capture.mp4");
             data = Uri.fromFile(movie);
         }
 
@@ -413,7 +415,10 @@ public class Capture extends CordovaPlugin {
             pendingRequests.resolveWithFailure(req, createErrorObject(CAPTURE_NO_MEDIA_FILES, "Error: data is null"));
         }
         else {
-            req.results.put(createMediaFile(data));
+            JSONObject result = createMediaFile(data);
+            JSONObject result2 = createMediaFile(thumbData);
+            req.results.put(result);
+            req.results.put(result2);
 
             if (req.results.length() >= req.limit) {
                 // Send Uri back to JavaScript for viewing video

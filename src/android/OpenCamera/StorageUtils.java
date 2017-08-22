@@ -236,16 +236,22 @@ public class StorageUtils {
     	    			// it seems caller apps seem to prefer the content:// Uri rather than one based on a File
 						// update for Android 7: seems that passing file uris is now restricted anyway, see https://code.google.com/p/android/issues/detail?id=203555
 						if( should_finish ) {
-							Activity activity = (Activity) context;
-							String action = activity.getIntent().getAction();
+							CaptureActivity main_activity = (CaptureActivity) context;
+							String action = main_activity.getIntent().getAction();
 							if (MediaStore.ACTION_VIDEO_CAPTURE.equals(action)) {
 								if (MyDebug.LOG)
 									Log.d(TAG, "from video capture intent");
 								Intent output = new Intent();
-								output.setData(uri);
+								//output.setData(uri);
+								Uri thumbUri = null;
+								if( main_activity.test_last_saved_image !=null && !main_activity.test_last_saved_image.isEmpty()) {
+									thumbUri = Uri.fromFile(new File(main_activity.test_last_saved_image));
+								}
+								output.putExtra("videoUri", uri);
+								output.putExtra("thumbUri", thumbUri);
 								// TODO: activity.test_last_saved_image is Thumbnail image. Please send it
-								activity.setResult(Activity.RESULT_OK, output);
-								activity.finish();
+								main_activity.setResult(Activity.RESULT_OK, output);
+								main_activity.finish();
 							}
 						}
     		 		}
@@ -496,7 +502,7 @@ public class StorageUtils {
         }
 
 		if( MyDebug.LOG ) {
-			Log.d(TAG, "getOutputMediaFile returns: " + mediaFile);
+			Log.d(TAG, "createOutputMediaFile returns: " + mediaFile);
 		}
 		if( mediaFile == null )
 			throw new IOException();

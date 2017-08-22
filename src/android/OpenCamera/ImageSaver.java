@@ -70,7 +70,7 @@ public class ImageSaver extends Thread {
 			DUMMY
 		}
 		Type type = Type.JPEG;
-		final boolean is_thumbnail;
+		final boolean is_video_thumbnail;
 		final boolean is_hdr; // for jpeg
 		final boolean save_expo; // for is_hdr
 		/* jpeg_images: for jpeg (may be null otherwise).
@@ -104,7 +104,7 @@ public class ImageSaver extends Thread {
 		final double geo_direction;
 		int sample_factor = 1; // sampling factor for thumbnail, higher means lower quality
 		
-		Request(boolean is_thumbnail,
+		Request(boolean is_video_thumbnail,
 			Type type,
 			boolean is_hdr,
 			boolean save_expo,
@@ -119,7 +119,7 @@ public class ImageSaver extends Thread {
 			String preference_stamp, String preference_textstamp, int font_size, int color, String pref_style, String preference_stamp_dateformat, String preference_stamp_timeformat, String preference_stamp_gpsformat,
 			boolean store_location, Location location, boolean store_geo_direction, double geo_direction,
 			int sample_factor) {
-			this.is_thumbnail = is_thumbnail;
+			this.is_video_thumbnail = is_video_thumbnail;
 			this.type = type;
 			this.is_hdr = is_hdr;
 			this.save_expo = save_expo;
@@ -773,7 +773,7 @@ public class ImageSaver extends Thread {
 				}
 			}
 			else {
-                if( request.is_thumbnail ){
+                if( request.is_video_thumbnail){
                     success = saveSingleImageNow(request, request.jpeg_images.get(0), null, "", false, false);
                 } else {
                     success = saveSingleImageNow(request, request.jpeg_images.get(0), null, "", true, true);
@@ -968,6 +968,50 @@ public class ImageSaver extends Thread {
 		if( bitmap != null ) {
 			Matrix matrix = new Matrix();
 			matrix.preScale(-1.0f, 1.0f);
+			int width = bitmap.getWidth();
+			int height = bitmap.getHeight();
+			Bitmap new_bitmap = Bitmap.createBitmap(bitmap, 0, 0, width, height, matrix, true);
+			// careful, as new_bitmap is sometimes not a copy!
+			if( new_bitmap != bitmap ) {
+				bitmap.recycle();
+				bitmap = new_bitmap;
+			}
+			if( MyDebug.LOG )
+				Log.d(TAG, "bitmap is mutable?: " + bitmap.isMutable());
+		}
+		return bitmap;
+	}
+
+	/** Mirrors the image.
+	 * @param data The jpeg data.
+	 * @param bitmap Optional argument - the bitmap if already unpacked from the jpeg data.
+	 * @param exifTempFile Temporary file that can be used to read exif tags (for orientation)
+	 * @return A bitmap representing the mirrored jpeg.
+	 */
+	private Bitmap rotateImage(byte [] data, Bitmap bitmap, File exifTempFile, int degree) {
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "rotateImage");
+			Log.d(TAG, "    rotate_degree = " + degree);
+		}
+		if( bitmap == null ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "need to decode bitmap to mirror");
+			// bitmap doesn't need to be mutable here, as this won't be the final bitmap retured from the auto-stabilise code
+			bitmap = loadBitmap(data, false);
+			if( bitmap == null ) {
+				// don't bother warning to the user - we simply won't mirror the image
+				System.gc();
+			}
+			if( bitmap != null ) {
+				// rotate the bitmap if necessary for exif tags
+				if( MyDebug.LOG )
+					Log.d(TAG, "rotate bitmap for exif tags?");
+				bitmap = rotateForExif(bitmap, data, exifTempFile);
+			}
+		}
+		if( bitmap != null ) {
+			Matrix matrix = new Matrix();
+			matrix.postRotate(degree);
 			int width = bitmap.getWidth();
 			int height = bitmap.getHeight();
 			Bitmap new_bitmap = Bitmap.createBitmap(bitmap, 0, 0, width, height, matrix, true);
@@ -1180,9 +1224,17 @@ public class ImageSaver extends Thread {
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "Save single image performance: time after auto-stabilise: " + (System.currentTimeMillis() - time_s));
 		}
-		if( request.mirror ) {
+
+		if( request.is_video_thumbnail) {
+			int video_orientation = main_activity.getPreview().getVideoOrientation();
+			if( MyDebug.LOG )
+				Log.d(TAG, "    video_orientation = " + video_orientation);
+			bitmap = rotateImage(data, bitmap, exifTempFile, video_orientation);
+
+		} else if( request.mirror ) {
 			bitmap = mirrorImage(data, bitmap, exifTempFile);
 		}
+
 		bitmap = stampImage(request, data, bitmap, exifTempFile);
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "Save single image performance: time after photostamp: " + (System.currentTimeMillis() - time_s));
@@ -1261,13 +1313,13 @@ public class ImageSaver extends Thread {
     			}
 			}
 			else if( storageUtils.isUsingSAF() ) {
-                if( request.is_thumbnail )
+                if( request.is_video_thumbnail)
                     saveUri = storageUtils.createOutputMediaFileSAF(StorageUtils.MEDIA_TYPE_THUMB, filename_suffix, "jpg", current_date);
                 else
 				    saveUri = storageUtils.createOutputMediaFileSAF(StorageUtils.MEDIA_TYPE_IMAGE, filename_suffix, "jpg", current_date);
 			}
 			else {
-                if( request.is_thumbnail )
+                if( request.is_video_thumbnail)
                     picFile = storageUtils.createOutputMediaFile(StorageUtils.MEDIA_TYPE_THUMB, filename_suffix, "jpg", current_date);
                 else
     			    picFile = storageUtils.createOutputMediaFile(StorageUtils.MEDIA_TYPE_IMAGE, filename_suffix, "jpg", current_date);
@@ -1369,7 +1421,7 @@ public class ImageSaver extends Thread {
 
     	            if( saveUri == null ) {
     	            	// broadcast for SAF is done later, when we've actually written out the file
-    	            	storageUtils.broadcastFile(picFile, true, false, update_thumbnail, !request.is_thumbnail);
+    	            	storageUtils.broadcastFile(picFile, true, false, update_thumbnail, !request.is_video_thumbnail);
     	            	main_activity.test_last_saved_image = picFile.getAbsolutePath();
     	            }
 	            }
@@ -1402,7 +1454,7 @@ public class ImageSaver extends Thread {
                     if( real_file != null ) {
     					if( MyDebug.LOG )
     						Log.d(TAG, "broadcast file");
-    	            	storageUtils.broadcastFile(real_file, true, false, true, !request.is_thumbnail);
+    	            	storageUtils.broadcastFile(real_file, true, false, true, !request.is_video_thumbnail);
     	            	main_activity.test_last_saved_image = real_file.getAbsolutePath();
                     }
                     else if( !image_capture_intent ) {
